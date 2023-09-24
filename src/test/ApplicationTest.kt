@@ -6,6 +6,7 @@ import io.ktor.client.statement.*
 import io.ktor.http.Headers
 import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
+import io.ktor.http.content.*
 import io.ktor.server.testing.testApplication
 import java.io.File
 import java.nio.file.Paths
@@ -50,26 +51,29 @@ class ApplicationTest {
             val response =
                 client.submitFormWithBinaryData(
                     url = "/get-buses",
-                    formData =
-                        formData {
-                            append(
-                                "network",
-                                file.readBytes(),
-                                Headers.build {
-                                    append(HttpHeaders.ContentDisposition, "filename=${file.name}")
-                                },
-                            )
-                        },
+                    formData = formDataFromFile(file),
                 )
             assertEquals(HttpStatusCode.OK, response.status)
             assertEquals(response.headers["Content-Type"], "application/json; charset=UTF-8")
             val body: String = response.bodyAsText()
 
-            // Roughly validate contant
+            // Roughly validate content
             assertTrue(body.startsWith("[{"))
             assertTrue(body.endsWith("}]"))
 
             val busString = "{\"id\":\"VL1_0\",\"voltage\":143.1,\"angle\":0.0,\"activePower\":0.0,\"reactivePower\":0.0}"
             assertContains(body, busString)
         }
+}
+
+fun formDataFromFile(file: File): List<PartData> {
+    return formData {
+        append(
+            "network",
+            file.readBytes(),
+            Headers.build {
+                append(HttpHeaders.ContentDisposition, "filename=${file.name}")
+            },
+        )
+    }
 }
