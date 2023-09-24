@@ -7,6 +7,7 @@
         <kotlin.version>1.9.10</kotlin.version>
         <ktor.version>2.3.4</ktor.version>
         <main.class>com.github.statnett.loadflowservice.AppKt</main.class>
+        <kotlin.code.style>official</kotlin.code.style>
     </properties>
 
     <repositories>
@@ -37,6 +38,11 @@
             <groupId>io.ktor</groupId>
             <artifactId>ktor-server-netty-jvm</artifactId>
             <version>${ktor.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.jetbrains.kotlin</groupId>
+            <artifactId>kotlin-test-junit5</artifactId>
+            <version>1.9.20-Beta2</version>
         </dependency>
     </dependencies>
 
