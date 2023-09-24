@@ -1,9 +1,6 @@
 package com.github.statnett.loadflowservice
 
 import io.ktor.http.HttpStatusCode
-import io.ktor.http.content.PartData
-import io.ktor.http.content.forEachPart
-import io.ktor.http.content.streamProvider
 import io.ktor.serialization.kotlinx.json.*
 import io.ktor.server.application.*
 import io.ktor.server.plugins.contentnegotiation.*
@@ -24,27 +21,12 @@ fun Application.module() {
         }
 
         post("/get-buses") {
-            var fileName = ""
-            var fileBytes = byteArrayOf()
+            val fileContent = fileContentFromRequest(call.receiveMultipart())
 
-            val multiPartData = call.receiveMultipart()
-
-            multiPartData.forEachPart { part ->
-                when (part) {
-                    is PartData.FileItem -> {
-                        fileName = part.originalFileName as String
-                        fileBytes = part.streamProvider().readBytes()
-                    }
-
-                    else -> {}
-                }
-                part.dispose()
-            }
-
-            if (fileName == "") {
+            if (fileContent.name == "") {
                 call.response.status(HttpStatusCode.UnprocessableEntity)
             } else {
-                val busProps = busesFromRequest(fileName, fileBytes)
+                val busProps = busesFromRequest(fileContent.name, fileContent.bytes)
                 call.respond(busProps)
             }
         }
