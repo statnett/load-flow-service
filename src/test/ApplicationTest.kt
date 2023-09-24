@@ -42,16 +42,10 @@ class ApplicationTest {
     @Test
     fun `test receive 14 buses for 14 bus network`() =
         testApplication {
-            // Initialize temporary file
-            val file = File.createTempFile("network", ".xiidm")
-            file.deleteOnExit()
-
-            IeeeCdfNetworkFactory.create14().write("XIIDM", Properties(), Paths.get(file.path))
-
             val response =
                 client.submitFormWithBinaryData(
                     url = "/get-buses",
-                    formData = formDataFromFile(file),
+                    formData = formDataFromFile(ieeeCdfNetwork14File()),
                 )
             assertEquals(HttpStatusCode.OK, response.status)
             assertEquals(response.headers["Content-Type"], "application/json; charset=UTF-8")
@@ -76,4 +70,13 @@ fun formDataFromFile(file: File): List<PartData> {
             },
         )
     }
+}
+
+fun ieeeCdfNetwork14File(): File {
+    // Initialize temporary file
+    val file = File.createTempFile("network", ".xiidm")
+    file.deleteOnExit()
+
+    IeeeCdfNetworkFactory.create14().write("XIIDM", Properties(), Paths.get(file.path))
+    return file
 }
