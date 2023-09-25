@@ -58,6 +58,17 @@ class ApplicationTest {
             val busString = "{\"id\":\"VL1_0\",\"voltage\":143.1,\"angle\":0.0,\"activePower\":0.0,\"reactivePower\":0.0}"
             assertContains(body, busString)
         }
+
+    @Test
+    fun `test default load parameters`() =
+        testApplication {
+            val response = client.get("/default-load-parameters")
+            assertEquals(response.status, HttpStatusCode.OK)
+
+            val body: String = response.bodyAsText()
+            assertTrue(body.startsWith("{"))
+            assertTrue(body.endsWith("}"))
+        }
 }
 
 fun formDataFromFile(file: File): List<PartData> {
