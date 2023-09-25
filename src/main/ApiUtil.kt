@@ -29,3 +29,7 @@ suspend fun multiPartDataHandler(multiPartData: MultiPartData): List<FileContent
     }
     return files
 }
+
+fun undoPrettyPrintJson(jsonString: String): String {
+    return jsonString.replace("\n", "").replace(" ", "")
+}
