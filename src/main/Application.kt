@@ -1,6 +1,6 @@
 package com.github.statnett.loadflowservice
 
-import io.ktor.http.HttpStatusCode
+import io.ktor.http.*
 import io.ktor.serialization.kotlinx.json.*
 import io.ktor.server.application.*
 import io.ktor.server.plugins.contentnegotiation.*
@@ -29,6 +29,10 @@ fun Application.module() {
                 val busProps = busesFromRequest(files[0].name, files[0].bytes)
                 call.respond(busProps)
             }
+        }
+
+        get("/default-load-parameters") {
+            call.respondText(defaultLoadFlowParameters(), ContentType.Application.Json, HttpStatusCode.OK)
         }
     }
 }
