@@ -21,12 +21,12 @@ fun Application.module() {
         }
 
         post("/get-buses") {
-            val fileContent = fileContentFromRequest(call.receiveMultipart())
+            val files = multiPartDataHandler(call.receiveMultipart())
 
-            if (fileContent.name == "") {
+            if (files.isEmpty()) {
                 call.response.status(HttpStatusCode.UnprocessableEntity)
             } else {
-                val busProps = busesFromRequest(fileContent.name, fileContent.bytes)
+                val busProps = busesFromRequest(files[0].name, files[0].bytes)
                 call.respond(busProps)
             }
         }
