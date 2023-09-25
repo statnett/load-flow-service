@@ -13,19 +13,19 @@ fun busesFromRequest(
 
 class FileContent(val name: String, val bytes: ByteArray)
 
-suspend fun fileContentFromRequest(multiPartData: MultiPartData): FileContent {
-    var name = ""
-    var content = byteArrayOf()
+suspend fun multiPartDataHandler(multiPartData: MultiPartData): List<FileContent> {
+    val files = mutableListOf<FileContent>()
     multiPartData.forEachPart { part ->
         when (part) {
             is PartData.FileItem -> {
-                name = part.originalFileName as String
-                content = part.streamProvider().readBytes()
+                val name = part.originalFileName as String
+                val content = part.streamProvider().readBytes()
+                files.add(FileContent(name, content))
             }
 
             else -> {}
         }
         part.dispose()
     }
-    return FileContent(name, content)
+    return files
 }
