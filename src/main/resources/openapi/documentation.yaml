@@ -1,0 +1,49 @@
+openapi: "3.0.3"
+info:
+  title: "Load Flow Service API"
+  description: "An API that interacts with Powsybl"
+  version: "1.0.0"
+servers:
+  - url: "http://0.0.0.0:8080"
+paths:
+  /get-buses:
+    post:
+      operationId: getBuses
+      description: "Return all buses in the network"
+      requestBody:
+        description: "Form with network sent as file"
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                network:
+                  type: string
+                  format: binary
+      responses:
+        "200":
+          description: "List with all buses in the network"
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Bus"
+
+
+components:
+  schemas:
+    Bus:
+      type: object
+      properties:
+        id:
+          type: string
+        voltage:
+          type: double
+        angle:
+          type: double
+        activePower:
+          type: double
+        reactivePower:
+          type: double
