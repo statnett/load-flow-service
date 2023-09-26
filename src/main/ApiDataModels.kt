@@ -29,3 +29,21 @@ fun busPropertiesFromNetwork(network: Network): List<BusProperties> {
         }
         .toList()
 }
+
+@Serializable
+data class BranchProperties(
+    val id: String,
+    val isOverloaded: Boolean
+)
+
+@Serializable
+data class LoadFlowResultForApi(val isOk: Boolean, val buses: List<BusProperties>, val branches: List<BranchProperties>)
+
+fun branchPropertiesFromNetwork(network: Network): List<BranchProperties> {
+    return network.lines.map { line ->
+        BranchProperties(
+            id = line.id,
+            isOverloaded = line.isOverloaded
+        )
+    }.toList()
+}
