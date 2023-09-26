@@ -1,17 +1,14 @@
 import com.github.statnett.loadflowservice.busPropertiesFromNetwork
 import com.powsybl.ieeecdf.converter.IeeeCdfNetworkFactory
 import io.ktor.client.request.*
-import io.ktor.client.request.forms.formData
-import io.ktor.client.request.forms.submitFormWithBinaryData
+import io.ktor.client.request.forms.*
 import io.ktor.client.statement.*
-import io.ktor.http.Headers
-import io.ktor.http.HttpHeaders
-import io.ktor.http.HttpStatusCode
+import io.ktor.http.*
 import io.ktor.http.content.*
-import io.ktor.server.testing.testApplication
+import io.ktor.server.testing.*
 import java.io.File
 import java.nio.file.Paths
-import java.util.Properties
+import java.util.*
 import kotlin.math.abs
 import kotlin.test.Test
 import kotlin.test.assertContains
@@ -34,9 +31,9 @@ class ApplicationTest {
                 client.submitFormWithBinaryData(
                     url = "/get-buses",
                     formData =
-                        formData {
-                            append("network", "not file content")
-                        },
+                    formData {
+                        append("network", "not file content")
+                    },
                 )
             assertEquals(HttpStatusCode.UnprocessableEntity, response.status)
         }
@@ -57,7 +54,8 @@ class ApplicationTest {
             assertTrue(body.startsWith("[{"))
             assertTrue(body.endsWith("}]"))
 
-            val busString = "{\"id\":\"VL1_0\",\"voltage\":143.1,\"angle\":0.0,\"activePower\":0.0,\"reactivePower\":0.0}"
+            val busString =
+                "{\"id\":\"VL1_0\",\"voltage\":143.1,\"angle\":0.0,\"activePower\":0.0,\"reactivePower\":0.0}"
             assertContains(body, busString)
         }
 
@@ -87,12 +85,12 @@ class ApplicationTest {
             val angles = busPropertiesFromNetwork(solvedNetwork).map { bus -> bus.angle }.toList()
 
             val regex = Regex("\"angle\":([0-9.-]+)")
-            val anglesFromJsonStr = regex.findAll(body).map {match -> match.groupValues[1].toDouble()}.toList()
+            val anglesFromJsonStr = regex.findAll(body).map { match -> match.groupValues[1].toDouble() }.toList()
 
             // It seems like the solved version from Powsybl contains rounded angles
             assertTrue(
-                angles.zip(anglesFromJsonStr).all {
-                    pair -> abs(pair.component1() - pair.component2()) < 0.01
+                angles.zip(anglesFromJsonStr).all { pair ->
+                    abs(pair.component1() - pair.component2()) < 0.01
                 }
             )
         }

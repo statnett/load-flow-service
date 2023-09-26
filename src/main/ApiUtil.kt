@@ -1,7 +1,6 @@
 package com.github.statnett.loadflowservice
 
 import com.powsybl.loadflow.LoadFlowParameters
-import com.powsybl.loadflow.LoadFlowResult
 import com.powsybl.loadflow.json.JsonLoadFlowParameters
 import io.ktor.http.content.*
 import java.io.ByteArrayInputStream
@@ -19,7 +18,7 @@ class FileContent(val name: String, val bytes: ByteArray)
 /**
  * Convenience class used to deserialize and update a load parameter instance
  */
-class LoadParameterContainer() {
+class LoadParameterContainer {
     var parameters = LoadFlowParameters()
     private var parametersModified = false
     private fun update(jsonString: String) {
@@ -35,13 +34,17 @@ class LoadParameterContainer() {
     }
 }
 
-suspend fun multiPartDataHandler(multiPartData: MultiPartData, formItemHandler: (part: PartData.FormItem) -> Unit = {}): List<FileContent> {
+suspend fun multiPartDataHandler(
+    multiPartData: MultiPartData,
+    formItemHandler: (part: PartData.FormItem) -> Unit = {}
+): List<FileContent> {
     val files = mutableListOf<FileContent>()
     multiPartData.forEachPart { part ->
         when (part) {
             is PartData.FormItem -> {
                 formItemHandler(part)
             }
+
             is PartData.FileItem -> {
                 val name = part.originalFileName as String
                 val content = part.streamProvider().readBytes()

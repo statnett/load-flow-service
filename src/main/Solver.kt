@@ -3,7 +3,6 @@ package com.github.statnett.loadflowservice
 import com.powsybl.iidm.network.Network
 import com.powsybl.loadflow.LoadFlow
 import com.powsybl.loadflow.LoadFlowParameters
-import com.powsybl.loadflow.LoadFlowResult
 import com.powsybl.loadflow.json.JsonLoadFlowParameters
 import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
