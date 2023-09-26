@@ -1,3 +1,4 @@
+import com.github.statnett.loadflowservice.busPropertiesFromNetwork
 import com.powsybl.ieeecdf.converter.IeeeCdfNetworkFactory
 import io.ktor.client.request.*
 import io.ktor.client.request.forms.formData
@@ -11,6 +12,7 @@ import io.ktor.server.testing.testApplication
 import java.io.File
 import java.nio.file.Paths
 import java.util.Properties
+import kotlin.math.abs
 import kotlin.test.Test
 import kotlin.test.assertContains
 import kotlin.test.assertEquals
@@ -69,6 +71,32 @@ class ApplicationTest {
             assertTrue(body.startsWith("{"))
             assertTrue(body.endsWith("}"))
         }
+
+    @Test
+    fun `test flow 14 bus network ok`() =
+        testApplication {
+            val response = client.submitFormWithBinaryData(
+                url = "/run-load-flow",
+                formData = formDataFromFile((ieeeCdfNetwork14File()))
+            )
+
+            assertEquals(response.status, HttpStatusCode.OK)
+
+            val body: String = response.bodyAsText()
+            val solvedNetwork = IeeeCdfNetworkFactory.create14Solved()
+            val angles = busPropertiesFromNetwork(solvedNetwork).map { bus -> bus.angle }.toList()
+
+            val regex = Regex("\"angle\":([0-9.-]+)")
+            val anglesFromJsonStr = regex.findAll(body).map {match -> match.groupValues[1].toDouble()}.toList()
+
+            // It seems like the solved version from Powsybl contains rounded angles
+            assertTrue(
+                angles.zip(anglesFromJsonStr).all {
+                    pair -> abs(pair.component1() - pair.component2()) < 0.01
+                }
+            )
+        }
+
 }
 
 fun formDataFromFile(file: File): List<PartData> {
