@@ -5,13 +5,78 @@ info:
   version: "1.0.0"
 servers:
   - url: "http://0.0.0.0:8080"
+  - url: "http://devbox:8080"
 paths:
-  /get-buses:
+  /buses:
     post:
-      operationId: getBuses
+      operationId: buses
       description: "Return all buses in the network"
       requestBody:
-        description: "Form with network sent as file"
+        $ref: "#/components/networkFile"
+      responses:
+        200:
+          description: "List with all buses in the network"
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Bus"
+        422:
+          $ref: "#/components/missingNetworkFileResponse"
+        500:
+          $ref: "#/components/internalError"
+
+  /default-load-parameters:
+    get:
+      description: "Get default parameters for the load flow calculation"
+      responses:
+        200:
+          description: "Default load parameters as JSON"
+          content:
+            application/json:
+              type: object
+  /substation-names:
+    post:
+      description: "List all substation names in the network. These names can for instance be used in the diagram methods"
+      requestBody:
+        $ref: "#/components/networkFile"
+      responses:
+        200:
+          description: "List with all substation names"
+          content:
+            application/json:
+              type: array
+              items:
+                type: string
+        422:
+          $ref: "#/components/missingNetworkFileResponse"
+        500:
+          $ref: "#/components/internalError"
+
+  /voltage-levels:
+    post:
+      description: "List all voltage levels in the network. These names can for instance be used in the diagram methods"
+      requestBody:
+        $ref: "#/components/networkFile"
+      responses:
+        200:
+          description: "List with all voltage levels"
+          content:
+            application/json:
+              type: array
+              items:
+                type: string
+        422:
+          $ref: "#/components/missingNetworkFileResponse"
+        500:
+          $ref: "#/components/internalError"
+
+  /run-load-flow:
+    post:
+      description: "Run load flow calculation"
+      requestBody:
+        description: "Form with network data sent as file"
         required: true
         content:
           multipart/form-data:
@@ -21,15 +86,52 @@ paths:
                 network:
                   type: string
                   format: binary
+                load-parameters:
+                  type: string
+            required:
+              - network
+
       responses:
-        "200":
-          description: "List with all buses in the network"
+        200:
+          description: "Result of load flow calculation"
           content:
             application/json:
-              schema:
-                type: array
-                items:
-                  $ref: "#/components/schemas/Bus"
+              type: object
+        422:
+          $ref: "#/components/missingNetworkFileResponse"
+        500:
+          $ref: "#/components/internalError"
+
+  /diagram:
+    post:
+      description: "Create a network area diagram"
+      requestBody:
+        $ref: "#/components/networkFile"
+      responses:
+        200:
+          $ref: "#/components/svgDiagram"
+        422:
+          $ref: "#/components/missingNetworkFileResponse"
+        500:
+          $ref: "#/components/internalError"
+
+  /diagram/{type}/{name}:
+    post:
+      description: "Create a diagram of a named group of components"
+      requestBody:
+        $ref: "#/components/networkFile"
+      responses:
+        200:
+          $ref: "#components/svgDiagram"
+        400:
+          description: "Unknown type or name"
+          content:
+            text/plain:
+              type: string
+        422:
+          $ref: "#/components/missingNetworkFileResponse"
+        500:
+          $ref: "#/components/internalError"
 
 
 components:
@@ -47,3 +149,32 @@ components:
           type: double
         reactivePower:
           type: double
+  networkFile:
+    description: "Form with network data sent as file"
+    required: true
+    content:
+      multipart/form-data:
+        schema:
+          type: object
+          properties:
+            network:
+              type: string
+              format: binary
+  missingNetworkFileResponse:
+    description: "No network file provided"
+    content:
+      text/plain:
+        type: string
+
+  internalError:
+    description: "An internal error occurred"
+    content:
+      text/plain:
+        type: string
+
+  svgDiagram:
+    description: "Generated svg figure"
+    content:
+      image/svg+xml:
+        type: string
+

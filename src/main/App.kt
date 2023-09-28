@@ -5,6 +5,8 @@ import io.ktor.http.*
 import io.ktor.serialization.kotlinx.json.*
 import io.ktor.server.application.*
 import io.ktor.server.plugins.contentnegotiation.*
+import io.ktor.server.plugins.cors.routing.*
+import io.ktor.server.plugins.statuspages.*
 import io.ktor.server.plugins.swagger.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
@@ -15,6 +17,17 @@ fun main(args: Array<String>): Unit = io.ktor.server.netty.EngineMain.main(args)
 fun Application.module() {
     install(ContentNegotiation) {
         json()
+    }
+
+    install(CORS) {
+        anyHost()
+        allowHeader(HttpHeaders.ContentType)
+    }
+
+    install(StatusPages) {
+        exception<Throwable> { call, cause ->
+            call.respondText("500: $cause", status = HttpStatusCode.InternalServerError)
+        }
     }
 
     routing {
@@ -47,7 +60,7 @@ fun Application.module() {
             }
         }
 
-        post("/voltage-levels") {
+        post("/voltage-level-names") {
             val files = multiPartDataHandler(call.receiveMultipart())
             if (files.isEmpty()) {
                 call.response.status(HttpStatusCode.UnprocessableEntity)
@@ -77,14 +90,9 @@ fun Application.module() {
             if (files.isEmpty()) {
                 call.response.status(HttpStatusCode.UnprocessableEntity)
             } else {
-                try {
-                    val network = networkFromFileContent(files[0])
-                    val diagram = singleLineDiagram(diagramType, name, network)
-                    call.respondText(diagram, ContentType.Image.SVG, HttpStatusCode.OK)
-                } catch (e: PowsyblException) {
-                    call.respondText(e.toString(), ContentType.Text.Plain, HttpStatusCode.BadRequest)
-                }
-
+                val network = networkFromFileContent(files[0])
+                val diagram = singleLineDiagram(diagramType, name, network)
+                call.respondText(diagram, ContentType.Image.SVG, HttpStatusCode.OK)
             }
         }
 
