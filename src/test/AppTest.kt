@@ -6,6 +6,8 @@ import io.ktor.client.statement.*
 import io.ktor.http.*
 import io.ktor.http.content.*
 import io.ktor.server.testing.*
+import org.junit.jupiter.api.DynamicTest
+import org.junit.jupiter.api.TestFactory
 import java.io.File
 import java.nio.file.Paths
 import java.util.*
@@ -37,6 +39,44 @@ class ApplicationTest {
                 )
             assertEquals(HttpStatusCode.UnprocessableEntity, response.status)
         }
+
+    @TestFactory
+    fun `test missing network in form`() = listOf(
+        "/buses",
+        "/run-load-flow",
+        "/substation-names",
+        "/voltage-level-names",
+        "/diagram",
+        "/diagram/substation/S1",
+        "/diagram/voltage-level/VL1"
+    ).map { url ->
+        DynamicTest.dynamicTest("422 when no network is passed to $url") {
+            testApplication {
+                val response = client.submitFormWithBinaryData(url = url, formData = listOf())
+                assertEquals(HttpStatusCode.UnprocessableEntity, response.status)
+            }
+        }
+    }
+
+    @TestFactory
+    fun `test internal server error when file parsing fails`()  = listOf(
+        "/buses",
+        "/run-load-flow",
+        "/substation-names",
+        "/voltage-level-names",
+        "/diagram",
+        "/diagram/substation/S1",
+        "/diagram/voltage-level/VL1"
+    ).map { url ->
+        DynamicTest.dynamicTest("500 when file content can not be parsed $url") {
+            testApplication {
+                val response = client.submitFormWithBinaryData(url = url, formData = formDataWithEmptyNetwork())
+                assertEquals(HttpStatusCode.InternalServerError, response.status)
+                val body = response.bodyAsText()
+                assertTrue(body.contains("PowsyblException"))
+            }
+        }
+    }
 
     @Test
     fun `test receive 14 buses for 14 bus network`() =
@@ -115,7 +155,9 @@ class ApplicationTest {
                 url = "/diagram/substation/non-existent-station",
                 formData = formDataFromFile(ieeeCdfNetwork14File())
             )
-            assertEquals(response.status, HttpStatusCode.BadRequest)
+            assertEquals(HttpStatusCode.InternalServerError, response.status)
+            val body = response.bodyAsText()
+            assertTrue(body.contains("Substation 'non-existent-station' not found"))
         }
 
     @Test
@@ -146,7 +188,7 @@ class ApplicationTest {
     fun `test 2 voltage levels extracted`() =
         testApplication {
             val response = client.submitFormWithBinaryData(
-                url = "/voltage-levels",
+                url = "/voltage-level-names",
                 formData = formDataFromFile(ieeeCdfNetwork14File())
             )
             assertEquals(response.status, HttpStatusCode.OK)
@@ -176,6 +218,18 @@ fun formDataFromFile(file: File): List<PartData> {
             Headers.build {
                 append(HttpHeaders.ContentDisposition, "filename=${file.name}")
             },
+        )
+    }
+}
+
+fun formDataWithEmptyNetwork(): List<PartData> {
+    return formData {
+        append(
+            "network",
+            byteArrayOf(),
+            Headers.build {
+                append(HttpHeaders.ContentDisposition, "filename=emptyFile.xiidm")
+            }
         )
     }
 }

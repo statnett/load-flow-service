@@ -71,7 +71,7 @@ enum class DiagramType { Generic, Substation, VoltageLevel }
 // Case insensitive enum value matching
 fun getDiagramType(value: String): DiagramType {
     return try {
-        DiagramType.entries.first { item -> item.toString().lowercase() == value.lowercase() }
+        DiagramType.entries.first { item -> item.toString().lowercase() == value.replace("-", "").lowercase() }
     } catch (e: NoSuchElementException) {
         DiagramType.Generic
     }
