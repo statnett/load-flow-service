@@ -1,13 +1,14 @@
 package com.github.statnett.loadflowservice
 
+import com.powsybl.commons.PowsyblException
 import io.ktor.http.*
 import io.ktor.serialization.kotlinx.json.*
 import io.ktor.server.application.*
 import io.ktor.server.plugins.contentnegotiation.*
+import io.ktor.server.plugins.swagger.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
-import io.ktor.server.plugins.swagger.*
 
 fun main(args: Array<String>): Unit = io.ktor.server.netty.EngineMain.main(args)
 
@@ -21,7 +22,7 @@ fun Application.module() {
             call.respondText("Hello, world!")
         }
 
-        post("/get-buses") {
+        post("/buses") {
             val files = multiPartDataHandler(call.receiveMultipart())
 
             if (files.isEmpty()) {
@@ -36,6 +37,26 @@ fun Application.module() {
             call.respondText(defaultLoadFlowParameters(), ContentType.Application.Json, HttpStatusCode.OK)
         }
 
+        post("/substation-names") {
+            val files = multiPartDataHandler(call.receiveMultipart())
+            if (files.isEmpty()) {
+                call.response.status(HttpStatusCode.UnprocessableEntity)
+            } else {
+                val network = networkFromFileContent(files[0])
+                call.respond(substationNames(network))
+            }
+        }
+
+        post("/voltage-levels") {
+            val files = multiPartDataHandler(call.receiveMultipart())
+            if (files.isEmpty()) {
+                call.response.status(HttpStatusCode.UnprocessableEntity)
+            } else {
+                val network = networkFromFileContent(files[0])
+                call.respond(voltageLevelNames(network))
+            }
+        }
+
         post("/run-load-flow") {
             val paramContainer = LoadParameterContainer()
             val files = multiPartDataHandler(call.receiveMultipart(), paramContainer::formItemHandler)
@@ -48,6 +69,35 @@ fun Application.module() {
                 call.respond(result)
             }
         }
-        swaggerUI(path="openapi", swaggerFile = "openapi/documentation.yaml")
+
+        post("/diagram/{type}/{name}") {
+            val diagramType = getDiagramType(call.parameters["type"] ?: DiagramType.Generic.toString())
+            val name = call.parameters["name"] ?: ""
+            val files = multiPartDataHandler((call.receiveMultipart()))
+            if (files.isEmpty()) {
+                call.response.status(HttpStatusCode.UnprocessableEntity)
+            } else {
+                try {
+                    val network = networkFromFileContent(files[0])
+                    val diagram = singleLineDiagram(diagramType, name, network)
+                    call.respondText(diagram, ContentType.Image.SVG, HttpStatusCode.OK)
+                } catch (e: PowsyblException) {
+                    call.respondText(e.toString(), ContentType.Text.Plain, HttpStatusCode.BadRequest)
+                }
+
+            }
+        }
+
+        post("/diagram") {
+            val files = multiPartDataHandler((call.receiveMultipart()))
+            if (files.isEmpty()) {
+                call.response.status(HttpStatusCode.UnprocessableEntity)
+            } else {
+                val network = networkFromFileContent(files[0])
+                val diagram = networkDiagram(network)
+                call.respondText(diagram, ContentType.Image.SVG, HttpStatusCode.OK)
+            }
+        }
+        swaggerUI(path = "openapi", swaggerFile = "openapi/documentation.yaml")
     }
 }
