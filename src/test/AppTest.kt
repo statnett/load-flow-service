@@ -29,7 +29,7 @@ class ApplicationTest {
         testApplication {
             val response =
                 client.submitFormWithBinaryData(
-                    url = "/get-buses",
+                    url = "/buses",
                     formData =
                     formData {
                         append("network", "not file content")
@@ -43,7 +43,7 @@ class ApplicationTest {
         testApplication {
             val response =
                 client.submitFormWithBinaryData(
-                    url = "/get-buses",
+                    url = "/buses",
                     formData = formDataFromFile(ieeeCdfNetwork14File()),
                 )
             assertEquals(HttpStatusCode.OK, response.status)
@@ -95,6 +95,77 @@ class ApplicationTest {
             )
         }
 
+    @Test
+    fun `test response ok network`() =
+        testApplication {
+            val response = client.submitFormWithBinaryData(
+                url = "/diagram",
+                formData = formDataFromFile(ieeeCdfNetwork14File())
+            )
+            val body = response.bodyAsText()
+            assertEquals(ContentType.Image.SVG.toString(), response.headers["Content-Type"])
+            assertTrue(isPlausibleSvg(body))
+            assertEquals(response.status, HttpStatusCode.OK)
+        }
+
+    @Test
+    fun `test bad request when substation does not exist`() =
+        testApplication {
+            val response = client.submitFormWithBinaryData(
+                url = "/diagram/substation/non-existent-station",
+                formData = formDataFromFile(ieeeCdfNetwork14File())
+            )
+            assertEquals(response.status, HttpStatusCode.BadRequest)
+        }
+
+    @Test
+    fun `test response OK and svg produced substation`() =
+        testApplication {
+            val response = client.submitFormWithBinaryData(
+                url = "/diagram/substation/S1",
+                formData = formDataFromFile(ieeeCdfNetwork14File())
+            )
+            assertEquals(response.status, HttpStatusCode.OK)
+            val body = response.bodyAsText()
+            assertTrue(isPlausibleSvg(body))
+        }
+
+    @Test
+    fun `test 11 substation names extracted`() =
+        testApplication {
+            val response = client.submitFormWithBinaryData(
+                url = "/substation-names",
+                formData = formDataFromFile(ieeeCdfNetwork14File())
+            )
+            assertEquals(response.status, HttpStatusCode.OK)
+            val substationNames = response.bodyAsText().split(",")
+            assertEquals(substationNames.size, 11)
+        }
+
+    @Test
+    fun `test 2 voltage levels extracted`() =
+        testApplication {
+            val response = client.submitFormWithBinaryData(
+                url = "/voltage-levels",
+                formData = formDataFromFile(ieeeCdfNetwork14File())
+            )
+            assertEquals(response.status, HttpStatusCode.OK)
+            val voltageLevels = response.bodyAsText().split(",")
+            assertEquals(14, voltageLevels.size)
+        }
+
+    @Test
+    fun `test svg produced for voltage level`() =
+        testApplication {
+            val response = client.submitFormWithBinaryData(
+                url = "/diagram/voltageLevel/VL1",
+                formData = formDataFromFile(ieeeCdfNetwork14File())
+            )
+            assertEquals(response.status, HttpStatusCode.OK)
+            val body = response.bodyAsText()
+            assertTrue(isPlausibleSvg(body))
+            assertEquals(response.headers["Content-Type"].toString(), "image/svg+xml")
+        }
 }
 
 fun formDataFromFile(file: File): List<PartData> {
@@ -116,4 +187,10 @@ fun ieeeCdfNetwork14File(): File {
 
     IeeeCdfNetworkFactory.create14().write("XIIDM", Properties(), Paths.get(file.path))
     return file
+}
+
+// Function for checking some properties of a body to verify that the returned body
+// is a valid svg image
+fun isPlausibleSvg(body: String): Boolean {
+    return body.contains("<svg") && body.contains("<?xml version")
 }
