@@ -1,18 +1,32 @@
 package com.github.statnett.loadflowservice
 
+import com.powsybl.cgmes.conversion.CgmesImport
+import com.powsybl.ieeecdf.converter.IeeeCdfImporter
+import com.powsybl.iidm.network.ImportersLoader
+import com.powsybl.iidm.network.ImportersLoaderList
 import com.powsybl.iidm.network.Network
+import com.powsybl.iidm.xml.XMLImporter
 import com.powsybl.loadflow.LoadFlow
 import com.powsybl.loadflow.LoadFlowParameters
 import com.powsybl.loadflow.json.JsonLoadFlowParameters
+import com.powsybl.matpower.converter.MatpowerImporter
+import com.powsybl.powerfactory.converter.PowerFactoryImporter
+import com.powsybl.psse.converter.PsseImporter
+import com.powsybl.ucte.converter.UcteImporter
 import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
 import java.io.InputStream
 
 fun networkFromStream(
-    fname: String,
+    filename: String,
     content: InputStream,
 ): Network {
-    return Network.read(fname, content)
+    val importerLoader = ImportersLoaderList(
+        PsseImporter(), XMLImporter(), CgmesImport(),
+        IeeeCdfImporter(), UcteImporter(),
+        MatpowerImporter(), PowerFactoryImporter()
+    )
+    return Network.read(filename, content)
 }
 
 fun networkFromFileContent(content: FileContent): Network {
