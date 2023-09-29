@@ -59,7 +59,7 @@ class ApplicationTest {
     }
 
     @TestFactory
-    fun `test internal server error when file parsing fails`()  = listOf(
+    fun `test internal server error when file parsing fails`() = listOf(
         "/buses",
         "/run-load-flow",
         "/substation-names",
@@ -208,6 +208,19 @@ class ApplicationTest {
             assertTrue(isPlausibleSvg(body))
             assertEquals(response.headers["Content-Type"].toString(), "image/svg+xml")
         }
+
+    @Test
+    fun `test read rawx`() =
+        testApplication {
+            val response = client.submitFormWithBinaryData(
+                url = "/buses",
+                formData = formDataMinimalNetworkRawx()
+            )
+            assertEquals(HttpStatusCode.OK, response.status)
+            val body = response.bodyAsText()
+            val num = body.split("},{").size
+            assertEquals(2, num)
+        }
 }
 
 fun formDataFromFile(file: File): List<PartData> {
@@ -247,4 +260,30 @@ fun ieeeCdfNetwork14File(): File {
 // is a valid svg image
 fun isPlausibleSvg(body: String): Boolean {
     return body.contains("<svg") && body.contains("<?xml version")
+}
+
+fun formDataMinimalNetworkRawx(): List<PartData> {
+    return formData {
+        append(
+            "network",
+            minimalRawx(),
+            Headers.build {
+                append(HttpHeaders.ContentDisposition, "filename=network.rawx")
+            }
+        )
+    }
+}
+
+fun minimalRawx(): ByteArray {
+    return ("{\"network\":{\"caseid\":{" +
+            "\"fields\":[\"ic\",\"sbase\",\"rev\",\"xfrrat\",\"nxfrat\",\"basfrq\",\"title1\"]," +
+            "\"data\":[0,100.00,35,0,0,60.00,\"PSS(R)EMinimumRAWXCase\"]}," +
+            "\"bus\":{\"fields\":[\"ibus\",\"name\",\"baskv\",\"ide\"]," +
+            "\"data\":[[1,\"Slack-Bus\",138.0,3],[2,\"Load-Bus\",138.01]]}," +
+            "\"load\":{\"fields\":[\"ibus\",\"loadid\",\"stat\",\"pl\",\"ql\"]," +
+            "\"data\":[[2,\"1\",1,40.0,15.0]]}," +
+            "\"generator\":{\"fields\":[\"ibus\",\"machid\",\"pg\",\"qg\"]," +
+            "\"data\":[[1,\"1\",\"40.35\",\"10.87\"]]}," +
+            "\"acline\":{\"fields\":[\"ibus\",\"jbus\",\"ckt\",\"rpu\",\"xpu\",\"bpu\"]," +
+            "\"data\":[[1,2,\"1\",0.01938,0.05917,0.05280]]}}}").toByteArray()
 }
