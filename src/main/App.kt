@@ -26,7 +26,10 @@ fun Application.module() {
 
     install(StatusPages) {
         exception<Throwable> { call, cause ->
-            call.respondText("500: $cause", status = HttpStatusCode.InternalServerError)
+            call.respondText(
+                "500: $cause.\nStack trace: ${cause.stackTraceToString()}",
+                status = HttpStatusCode.InternalServerError
+            )
         }
     }
 
