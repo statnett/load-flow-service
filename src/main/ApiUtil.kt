@@ -9,6 +9,7 @@ import io.github.oshai.kotlinlogging.KotlinLogging
 import io.ktor.http.content.*
 import java.io.ByteArrayInputStream
 import java.io.StringWriter
+import java.security.MessageDigest
 
 private val logger = KotlinLogging.logger {}
 
@@ -20,7 +21,16 @@ fun busesFromRequest(
     return busPropertiesFromNetwork(network)
 }
 
-class FileContent(val name: String, val bytes: ByteArray)
+class FileContent(val name: String, val bytes: ByteArray) {
+    fun contentHash(): String {
+        val md = MessageDigest.getInstance("MD5")
+        return md.digest(this.bytes).joinToString(separator = "") { eachByte -> "%02x".format(eachByte) }
+    }
+
+    fun contentAsStream(): ByteArrayInputStream {
+        return ByteArrayInputStream(this.bytes)
+    }
+}
 
 /**
  * Convenience class used to deserialize and update a load parameter instance
@@ -68,9 +78,11 @@ suspend fun multiPartDataHandler(
             }
 
             is PartData.FileItem -> {
-                val name = part.originalFileName as String
+                val name = part.originalFileName ?: ""
                 val content = part.streamProvider().readBytes()
-                files.add(FileContent(name, content))
+                val fileContent = FileContent(name, content)
+                logger.info { "Received file $name with size ${content.size} bytes. Content hash: ${fileContent.contentHash()}" }
+                files.add(fileContent)
             }
 
             else -> {}
