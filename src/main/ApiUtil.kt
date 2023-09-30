@@ -5,9 +5,12 @@ import com.powsybl.loadflow.LoadFlowParameters
 import com.powsybl.loadflow.json.JsonLoadFlowParameters
 import com.powsybl.nad.NetworkAreaDiagram
 import com.powsybl.sld.SingleLineDiagram
+import io.github.oshai.kotlinlogging.KotlinLogging
 import io.ktor.http.content.*
 import java.io.ByteArrayInputStream
 import java.io.StringWriter
+
+private val logger = KotlinLogging.logger {}
 
 fun busesFromRequest(
     type: String,
@@ -25,15 +28,30 @@ class FileContent(val name: String, val bytes: ByteArray)
 class LoadParameterContainer {
     var parameters = LoadFlowParameters()
     private var parametersModified = false
+
+    private fun currentVersion(): String {
+        return LoadFlowParameters.VERSION
+    }
+
+    private fun addVersionToJsonString(jsonString: String): String {
+        return "{\"version\": ${currentVersion()}," + jsonString.drop(1)
+    }
+
+    private fun hasVersion(jsonString: String): Boolean {
+        return jsonString.contains("version")
+    }
+
     private fun update(jsonString: String) {
-        this.parameters = JsonLoadFlowParameters.update(this.parameters, ByteArrayInputStream(jsonString.toByteArray()))
+        val jsonStringWithVersion = if (hasVersion(jsonString)) jsonString else addVersionToJsonString(jsonString)
+        this.parameters = JsonLoadFlowParameters.update(this.parameters, jsonStringWithVersion.byteInputStream())
         this.parametersModified = true
     }
 
     fun formItemHandler(part: PartData.FormItem) {
         val name = part.name ?: ""
-        if (name == "load-parameters") {
+        if (name == "load-flow-parameters") {
             this.update(part.value)
+            logger.info { "Received load flow parameters: ${part.value}" }
         }
     }
 }
