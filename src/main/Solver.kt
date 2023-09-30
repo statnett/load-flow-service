@@ -2,7 +2,6 @@ package com.github.statnett.loadflowservice
 
 import com.powsybl.cgmes.conversion.CgmesImport
 import com.powsybl.ieeecdf.converter.IeeeCdfImporter
-import com.powsybl.iidm.network.ImportersLoader
 import com.powsybl.iidm.network.ImportersLoaderList
 import com.powsybl.iidm.network.Network
 import com.powsybl.iidm.xml.XMLImporter

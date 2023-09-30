@@ -136,6 +136,47 @@ class ApplicationTest {
         }
 
     @Test
+    fun `test dc solve ok`() =
+        testApplication {
+            val formData = formDataFromFile(ieeeCdfNetwork14File())
+            val loadParams = formData {
+                append("load-flow-parameters", "{\"dc\": true}")
+            }
+
+            val response = client.submitFormWithBinaryData(
+                url = "/run-load-flow",
+                formData = formData + loadParams
+            )
+
+            val body = response.bodyAsText()
+            assertEquals(HttpStatusCode.OK, response.status)
+
+            val regex = Regex("\"isOk\":([^,]+)")
+            val match = regex.find(body)!!
+            val solveStatus = match.groupValues[1].toBoolean()
+            assertTrue(solveStatus)
+        }
+
+    @Test
+    fun `test descriptive response on incompatible version of load parameters`() =
+        testApplication {
+            val formData = formDataFromFile(ieeeCdfNetwork14File())
+            val loadParams = formData {
+                append("load-flow-parameters", "{\"version\":\"1.0\",\"dc\": true}")
+            }
+
+            val response = client.submitFormWithBinaryData(
+                url = "/run-load-flow",
+                formData = formData + loadParams
+            )
+            val body = response.bodyAsText()
+            assertEquals(HttpStatusCode.InternalServerError, response.status)
+
+            // dc flag was introduced in v1.4
+            assertTrue(body.contains(">= 1.4"))
+        }
+
+    @Test
     fun `test response ok network`() =
         testApplication {
             val response = client.submitFormWithBinaryData(
