@@ -89,6 +89,7 @@
     <build>
         <sourceDirectory>${project.basedir}/src/main</sourceDirectory>
         <testSourceDirectory>${project.basedir}/src/test</testSourceDirectory>
+        <finalName>load-flow-service</finalName>
         <plugins>
             <plugin>
                 <groupId>org.jetbrains.kotlin</groupId>
