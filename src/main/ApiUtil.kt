@@ -5,6 +5,7 @@ import com.powsybl.loadflow.LoadFlowParameters
 import com.powsybl.loadflow.json.JsonLoadFlowParameters
 import com.powsybl.nad.NetworkAreaDiagram
 import com.powsybl.sld.SingleLineDiagram
+import com.powsybl.sld.SldParameters
 import io.github.oshai.kotlinlogging.KotlinLogging
 import io.ktor.http.content.*
 import java.io.ByteArrayInputStream
@@ -113,13 +114,14 @@ fun singleLineDiagram(type: DiagramType, name: String, network: Network): String
 
     // Declare a writer for metadata
     val metaDataWriter = StringWriter()
+    val sldParams = SldParameters()
     when (type) {
         DiagramType.VoltageLevel -> {
-            SingleLineDiagram.drawVoltageLevel(network, name, svgWriter, metaDataWriter)
+            SingleLineDiagram.drawVoltageLevel(network, name, svgWriter, metaDataWriter, sldParams)
         }
 
         DiagramType.Substation -> {
-            SingleLineDiagram.drawSubstation(network, name, svgWriter, metaDataWriter)
+            SingleLineDiagram.drawSubstation(network, name, svgWriter, metaDataWriter, sldParams)
         }
 
         DiagramType.Generic -> {
@@ -131,7 +133,7 @@ fun singleLineDiagram(type: DiagramType, name: String, network: Network): String
 
 fun networkDiagram(network: Network): String {
     val svgWriter = StringWriter()
-    NetworkAreaDiagram(network).draw(svgWriter)
+    NetworkAreaDiagram.draw(network, svgWriter)
     return svgWriter.toString()
 }
 
