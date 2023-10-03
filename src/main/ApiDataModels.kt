@@ -42,7 +42,12 @@ data class LineProperties(
 data class TerminalProperties(val activePower: Double, val reactivePower: Double)
 
 @Serializable
-data class LoadFlowResultForApi(val isOk: Boolean, val buses: List<BusProperties>, val branches: List<LineProperties>)
+data class LoadFlowResultForApi(
+    val isOk: Boolean,
+    val buses: List<BusProperties>,
+    val branches: List<LineProperties>,
+    val log: String
+)
 
 fun branchPropertiesFromNetwork(network: Network): List<LineProperties> {
     return network.lines.map { line ->
