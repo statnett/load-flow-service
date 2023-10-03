@@ -1,6 +1,7 @@
 package com.github.statnett.loadflowservice
 
-import com.powsybl.iidm.network.*
+import com.powsybl.iidm.network.ImportersServiceLoader
+import com.powsybl.iidm.network.Network
 import com.powsybl.loadflow.LoadFlow
 import com.powsybl.loadflow.LoadFlowParameters
 import com.powsybl.loadflow.json.JsonLoadFlowParameters
@@ -52,6 +53,7 @@ fun solve(
     return LoadFlowResultForApi(
         isOk = result.isOk,
         buses = busPropertiesFromNetwork(network),
-        branches = branchPropertiesFromNetwork(network)
+        branches = branchPropertiesFromNetwork(network),
+        log = result.logs ?: ""
     )
 }
