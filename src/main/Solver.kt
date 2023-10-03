@@ -1,5 +1,7 @@
 package com.github.statnett.loadflowservice
 
+import com.powsybl.commons.reporter.ReporterModel
+import com.powsybl.computation.local.LocalComputationManager
 import com.powsybl.iidm.network.ImportersServiceLoader
 import com.powsybl.iidm.network.Network
 import com.powsybl.loadflow.LoadFlow
@@ -8,6 +10,7 @@ import com.powsybl.loadflow.json.JsonLoadFlowParameters
 import io.github.oshai.kotlinlogging.KotlinLogging
 import java.io.ByteArrayOutputStream
 import java.io.InputStream
+import java.io.StringWriter
 
 private val logger = KotlinLogging.logger {}
 
@@ -45,15 +48,37 @@ fun defaultLoadFlowParameters(): String {
     return undoPrettyPrintJson(stream.toString())
 }
 
+fun loadFlowTaskName(): String {
+    return "load-flow"
+}
+
+fun loadFlowReporter(): ReporterModel {
+    val name = loadFlowTaskName()
+    return ReporterModel(name, name)
+}
+
+fun reporterToString(reporter: ReporterModel): String {
+    val writer = StringWriter()
+    reporter.export(writer)
+    return writer.toString()
+}
+
 fun solve(
     network: Network,
     parameters: LoadFlowParameters,
 ): LoadFlowResultForApi {
-    val result = LoadFlow.run(network, parameters)
+    val reporter = loadFlowReporter()
+    val result = LoadFlow.run(
+        network,
+        network.variantManager.workingVariantId,
+        LocalComputationManager.getDefault(),
+        parameters,
+        reporter
+    )
     return LoadFlowResultForApi(
         isOk = result.isOk,
         buses = busPropertiesFromNetwork(network),
         branches = branchPropertiesFromNetwork(network),
-        log = result.logs ?: ""
+        report = reporterToString(reporter)
     )
 }

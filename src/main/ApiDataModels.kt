@@ -1,5 +1,7 @@
 package com.github.statnett.loadflowservice
 
+import com.powsybl.commons.reporter.Reporter
+import com.powsybl.commons.reporter.ReporterModel
 import com.powsybl.iidm.network.Network
 import kotlinx.serialization.Serializable
 
@@ -46,7 +48,7 @@ data class LoadFlowResultForApi(
     val isOk: Boolean,
     val buses: List<BusProperties>,
     val branches: List<LineProperties>,
-    val log: String
+    val report: String
 )
 
 fun branchPropertiesFromNetwork(network: Network): List<LineProperties> {
