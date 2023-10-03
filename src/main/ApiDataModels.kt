@@ -1,7 +1,5 @@
 package com.github.statnett.loadflowservice
 
-import com.powsybl.commons.reporter.Reporter
-import com.powsybl.commons.reporter.ReporterModel
 import com.powsybl.iidm.network.Network
 import kotlinx.serialization.Serializable
 

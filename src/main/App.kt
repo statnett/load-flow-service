@@ -46,7 +46,7 @@ fun Application.module() {
             if (files.isEmpty()) {
                 call.response.status(HttpStatusCode.UnprocessableEntity)
             } else {
-                val busProps = busesFromRequest(files[0].name, files[0].bytes)
+                val busProps = busesFromRequest(files[0])
                 call.respond(busProps)
             }
         }

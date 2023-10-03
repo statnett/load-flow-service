@@ -8,29 +8,15 @@ import com.powsybl.sld.SingleLineDiagram
 import com.powsybl.sld.SldParameters
 import io.github.oshai.kotlinlogging.KotlinLogging
 import io.ktor.http.content.*
-import java.io.ByteArrayInputStream
 import java.io.StringWriter
-import java.security.MessageDigest
 
 private val logger = KotlinLogging.logger {}
 
 fun busesFromRequest(
-    type: String,
-    body: ByteArray,
+    content: FileContent
 ): List<BusProperties> {
-    val network = networkFromStream(type, ByteArrayInputStream(body))
+    val network = networkFromFileContent(content)
     return busPropertiesFromNetwork(network)
-}
-
-class FileContent(val name: String, val bytes: ByteArray) {
-    fun contentHash(): String {
-        val md = MessageDigest.getInstance("MD5")
-        return md.digest(this.bytes).joinToString(separator = "") { eachByte -> "%02x".format(eachByte) }
-    }
-
-    fun contentAsStream(): ByteArrayInputStream {
-        return ByteArrayInputStream(this.bytes)
-    }
 }
 
 /**

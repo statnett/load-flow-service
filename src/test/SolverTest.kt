@@ -1,4 +1,6 @@
+import com.github.statnett.loadflowservice.FileContent
 import com.github.statnett.loadflowservice.defaultLoadFlowParameters
+import com.github.statnett.loadflowservice.networkFromFileContent
 import com.powsybl.loadflow.LoadFlowParameters
 import com.powsybl.loadflow.json.JsonLoadFlowParameters
 import org.junit.Test
@@ -14,4 +16,11 @@ class SolverTest {
         assertEquals(parameters.toString(), fromJson.toString())
     }
 
+    @Test
+    fun `test load network from zip input stream`() {
+        val cimXmlFile = ieeeCdfNetwork14CgmesFile()
+        val fc = FileContent("cgmes_network.zip", cimXmlFile.readBytes())
+        val network = networkFromFileContent(fc)
+        assertEquals(14, network.busView.buses.toList().size)
+    }
 }
