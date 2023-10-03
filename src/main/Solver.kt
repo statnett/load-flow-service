@@ -1,26 +1,20 @@
 package com.github.statnett.loadflowservice
 
+import com.powsybl.commons.PowsyblException
+import com.powsybl.commons.reporter.Reporter
 import com.powsybl.commons.reporter.ReporterModel
 import com.powsybl.computation.local.LocalComputationManager
-import com.powsybl.iidm.network.ImportersServiceLoader
-import com.powsybl.iidm.network.Network
+import com.powsybl.iidm.network.*
 import com.powsybl.loadflow.LoadFlow
 import com.powsybl.loadflow.LoadFlowParameters
 import com.powsybl.loadflow.json.JsonLoadFlowParameters
 import io.github.oshai.kotlinlogging.KotlinLogging
 import java.io.ByteArrayOutputStream
-import java.io.InputStream
 import java.io.StringWriter
+
 
 private val logger = KotlinLogging.logger {}
 
-fun networkFromStream(
-    filename: String,
-    content: InputStream,
-): Network {
-    warnOnFewAvailableImporters()
-    return Network.read(filename, content)
-}
 
 fun warnOnFewAvailableImporters() {
     val numLoaders = ImportersServiceLoader().loadImporters().size
@@ -34,9 +28,23 @@ fun warnOnFewAvailableImporters() {
     }
 }
 
+// This function follows closely the functionality implemented in Powsybl-core Network.read
+// However, here we create the ReadOnlyMemDataSource our self which supports constructing it
+// from a zip archive (e.g. CIM/XML files zipped).
 fun networkFromFileContent(content: FileContent): Network {
     logger.info { "Loading network from file ${content.name}" }
-    return networkFromStream(content.name, content.contentAsStream())
+
+    val importConfig = ImportConfig.CACHE.get()
+    val loader = ImportersServiceLoader()
+    val reporter = Reporter.NO_OP
+    val computationManager = LocalComputationManager.getDefault()
+    val dataSource = content.asReadOnlyMemDataSource()
+    val importer = Importer.find(dataSource, loader, computationManager, importConfig)
+    if (importer != null) {
+        val networkFactory = NetworkFactory.findDefault()
+        return importer.importData(dataSource, networkFactory, null, reporter)
+    }
+    throw PowsyblException("No importer found")
 }
 
 fun defaultLoadFlowParameters(): String {

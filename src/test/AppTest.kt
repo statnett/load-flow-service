@@ -4,13 +4,9 @@ import io.ktor.client.request.*
 import io.ktor.client.request.forms.*
 import io.ktor.client.statement.*
 import io.ktor.http.*
-import io.ktor.http.content.*
 import io.ktor.server.testing.*
 import org.junit.jupiter.api.DynamicTest
 import org.junit.jupiter.api.TestFactory
-import java.io.File
-import java.nio.file.Paths
-import java.util.*
 import kotlin.math.abs
 import kotlin.test.Test
 import kotlin.test.assertContains
@@ -133,6 +129,16 @@ class ApplicationTest {
                     abs(pair.component1() - pair.component2()) < 0.01
                 }
             )
+        }
+
+    @Test
+    fun `test 14 bus ok`() =
+        testApplication {
+            val response = client.submitFormWithBinaryData(
+                url = "/buses",
+                formData = formDataFromFile(ieeeCdfNetwork14CgmesFile())
+            )
+            assertEquals(HttpStatusCode.OK, response.status)
         }
 
     @Test
@@ -264,38 +270,6 @@ class ApplicationTest {
         }
 }
 
-fun formDataFromFile(file: File): List<PartData> {
-    return formData {
-        append(
-            "network",
-            file.readBytes(),
-            Headers.build {
-                append(HttpHeaders.ContentDisposition, "filename=${file.name}")
-            },
-        )
-    }
-}
-
-fun formDataWithEmptyNetwork(): List<PartData> {
-    return formData {
-        append(
-            "network",
-            byteArrayOf(),
-            Headers.build {
-                append(HttpHeaders.ContentDisposition, "filename=emptyFile.xiidm")
-            }
-        )
-    }
-}
-
-fun ieeeCdfNetwork14File(): File {
-    // Initialize temporary file
-    val file = File.createTempFile("network", ".xiidm")
-    file.deleteOnExit()
-
-    IeeeCdfNetworkFactory.create14().write("XIIDM", Properties(), Paths.get(file.path))
-    return file
-}
 
 // Function for checking some properties of a body to verify that the returned body
 // is a valid svg image
@@ -303,28 +277,4 @@ fun isPlausibleSvg(body: String): Boolean {
     return body.contains("<svg") && body.contains("<?xml version")
 }
 
-fun formDataMinimalNetworkRawx(): List<PartData> {
-    return formData {
-        append(
-            "network",
-            minimalRawx(),
-            Headers.build {
-                append(HttpHeaders.ContentDisposition, "filename=network.rawx")
-            }
-        )
-    }
-}
 
-fun minimalRawx(): ByteArray {
-    return ("{\"network\":{\"caseid\":{" +
-            "\"fields\":[\"ic\",\"sbase\",\"rev\",\"xfrrat\",\"nxfrat\",\"basfrq\",\"title1\"]," +
-            "\"data\":[0,100.00,35,0,0,60.00,\"PSS(R)EMinimumRAWXCase\"]}," +
-            "\"bus\":{\"fields\":[\"ibus\",\"name\",\"baskv\",\"ide\"]," +
-            "\"data\":[[1,\"Slack-Bus\",138.0,3],[2,\"Load-Bus\",138.01]]}," +
-            "\"load\":{\"fields\":[\"ibus\",\"loadid\",\"stat\",\"pl\",\"ql\"]," +
-            "\"data\":[[2,\"1\",1,40.0,15.0]]}," +
-            "\"generator\":{\"fields\":[\"ibus\",\"machid\",\"pg\",\"qg\"]," +
-            "\"data\":[[1,\"1\",\"40.35\",\"10.87\"]]}," +
-            "\"acline\":{\"fields\":[\"ibus\",\"jbus\",\"ckt\",\"rpu\",\"xpu\",\"bpu\"]," +
-            "\"data\":[[1,2,\"1\",0.01938,0.05917,0.05280]]}}}").toByteArray()
-}
