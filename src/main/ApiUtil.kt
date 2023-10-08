@@ -19,32 +19,28 @@ fun busesFromRequest(
     return busPropertiesFromNetwork(network)
 }
 
+interface FormItemLoadable {
+    fun formItemHandler(part: PartData.FormItem)
+}
+
 /**
  * Convenience class used to deserialize and update a load parameter instance
  */
-class LoadParameterContainer {
+class LoadParameterContainer : AutoVersionableJsonParser(), FormItemLoadable {
     var parameters = LoadFlowParameters()
     private var parametersModified = false
 
-    private fun currentVersion(): String {
+    override fun currentVersion(): String {
         return LoadFlowParameters.VERSION
     }
 
-    private fun addVersionToJsonString(jsonString: String): String {
-        return "{\"version\": ${currentVersion()}," + jsonString.drop(1)
-    }
-
-    private fun hasVersion(jsonString: String): Boolean {
-        return jsonString.contains("version")
-    }
-
     private fun update(jsonString: String) {
-        val jsonStringWithVersion = if (hasVersion(jsonString)) jsonString else addVersionToJsonString(jsonString)
-        this.parameters = JsonLoadFlowParameters.update(this.parameters, jsonStringWithVersion.byteInputStream())
+        val withVersion = jsonStringWithVersion(jsonString)
+        this.parameters = JsonLoadFlowParameters.update(this.parameters, withVersion.byteInputStream())
         this.parametersModified = true
     }
 
-    fun formItemHandler(part: PartData.FormItem) {
+    override fun formItemHandler(part: PartData.FormItem) {
         val name = part.name ?: ""
         if (name == "load-flow-parameters") {
             this.update(part.value)
