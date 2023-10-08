@@ -107,3 +107,9 @@ fun basicContingencyJson(): String {
             "{\"id\":\"L9-8-0\",\"type\":\"BRANCH\"}]}," +
             "{\"id\":\"contingency2\",\"elements\":[{\"id\":\"B1-G\",\"type\":\"GENERATOR\"}]}]}")
 }
+
+fun sensitivityFactorList(): String {
+    return "[{\"functionType\":\"BRANCH_ACTIVE_POWER_2\",\"functionId\":\"l\"," +
+            "\"variableType\":\"INJECTION_ACTIVE_POWER\",\"variableId\":\"g\",\"variableSet\":false," +
+            "\"contingencyContextType\":\"ALL\"}]"
+}
