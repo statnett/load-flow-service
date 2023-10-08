@@ -1,13 +1,16 @@
 package com.github.statnett.loadflowservice
 
 import com.powsybl.commons.PowsyblException
+import com.powsybl.commons.json.JsonUtil
 import com.powsybl.commons.reporter.Reporter
 import com.powsybl.commons.reporter.ReporterModel
 import com.powsybl.computation.local.LocalComputationManager
+import com.powsybl.contingency.contingency.list.ContingencyList
 import com.powsybl.iidm.network.*
 import com.powsybl.loadflow.LoadFlow
 import com.powsybl.loadflow.LoadFlowParameters
 import com.powsybl.loadflow.json.JsonLoadFlowParameters
+import com.powsybl.sensitivity.*
 import io.github.oshai.kotlinlogging.KotlinLogging
 import java.io.ByteArrayOutputStream
 import java.io.StringWriter
@@ -89,4 +92,44 @@ fun solve(
         branches = branchPropertiesFromNetwork(network),
         report = reporterToString(reporter)
     )
+}
+
+fun runSensitivityAnalysis(
+    network: Network,
+    factors: List<SensitivityFactor>,
+    params: SensitivityAnalysisParameters,
+    contingenciesList: ContingencyList
+): String {
+    val reporter = ReporterModel("sensitivity", "")
+    val variableSets: List<SensitivityVariableSet> = listOf()
+    val contingencies = contingenciesList.getContingencies(network)
+    val factorReader = SensitivityFactorModelReader(factors, network)
+
+    val factory = JsonUtil.createJsonFactory()
+    val writer = StringWriter()
+    val jsonGenerator = factory.createGenerator(writer)
+    jsonGenerator.writeStartObject()
+    jsonGenerator.writeFieldName("sensitivity-results")
+    val resultWriter = SensitivityResultJsonWriter(jsonGenerator, contingencies)
+
+    SensitivityAnalysis.run(
+        network,
+        network.variantManager.workingVariantId,
+        factorReader,
+        resultWriter,
+        contingencies,
+        variableSets,
+        params,
+        LocalComputationManager.getDefault(),
+        reporter
+    )
+    // Close the nested array created by Powsybl
+    jsonGenerator.writeEndArray()
+    jsonGenerator.writeEndArray()
+
+    // Add run report to the JSON
+    jsonGenerator.writeStringField("report", reporterToString(reporter))
+    jsonGenerator.writeEndObject()
+    jsonGenerator.close()
+    return writer.toString()
 }

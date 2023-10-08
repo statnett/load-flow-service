@@ -111,6 +111,29 @@ fun Application.module() {
                 call.respondText(diagram, ContentType.Image.SVG, HttpStatusCode.OK)
             }
         }
+
+        post("/sensitivity-analysis") {
+            val loadParamCnt = LoadParameterContainer()
+            val sensParamCnt = SensitivityAnalysisParametersContainer()
+            val sensFactorCnt = SensitivityFactorContainer()
+            val contingencyCnt = ContingencyListContainer()
+            val itemHandler = MultiFormItemLoaders(listOf(loadParamCnt, sensParamCnt, sensFactorCnt, contingencyCnt))
+
+            val files = multiPartDataHandler(call.receiveMultipart(), itemHandler::formItemHandler)
+            if (files.isEmpty()) {
+                call.response.status(HttpStatusCode.UnprocessableEntity)
+            } else {
+                sensParamCnt.parameters.setLoadFlowParameters(loadParamCnt.parameters)
+                val network = networkFromFileContent(files[0])
+                val result = runSensitivityAnalysis(
+                    network,
+                    sensFactorCnt.factors,
+                    sensParamCnt.parameters,
+                    contingencyCnt.contingencies
+                )
+                call.respondText(result, ContentType.Application.Json, HttpStatusCode.OK)
+            }
+        }
         swaggerUI(path = "openapi", swaggerFile = "openapi/documentation.yaml")
     }
 }

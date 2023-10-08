@@ -7,6 +7,7 @@ import io.ktor.http.*
 import io.ktor.server.testing.*
 import org.junit.jupiter.api.DynamicTest
 import org.junit.jupiter.api.TestFactory
+import testDataFactory.*
 import kotlin.math.abs
 import kotlin.test.Test
 import kotlin.test.assertContains
@@ -14,6 +15,9 @@ import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
 class ApplicationTest {
+    // Holds various form data variants for the sensitivity-analysis end-point
+    val sensitivityFormData = SensitivityAnalysisFormDataContainer()
+
     @Test
     fun testRoot() =
         testApplication {
@@ -268,6 +272,29 @@ class ApplicationTest {
             val num = body.split("},{").size
             assertEquals(2, num)
         }
+
+    @TestFactory
+    fun `test 200 response for all valid sensitivity inputs`() = allSensitivityAnalysisConfigs().map { config ->
+        DynamicTest.dynamicTest("Test 200 for config $config") {
+            testApplication {
+                val response = client.submitFormWithBinaryData(
+                    url = "/sensitivity-analysis",
+                    formData = sensitivityFormData.formData(config)
+                )
+                assertEquals(HttpStatusCode.OK, response.status)
+                val body = response.bodyAsText()
+
+                // There are two contingencies so when we have contingencies there should be three results
+                // Otherwise one
+                val numRes = if (config.withContingencies) 3 else 1
+
+                val regex = Regex(""""sensitivity-results":\[\[(.*)]]""")
+                val match = regex.find(body)!!
+                val content = match.groupValues[1]
+                assertEquals(numRes, content.count { c -> c == '{' })
+            }
+        }
+    }
 }
 
 
