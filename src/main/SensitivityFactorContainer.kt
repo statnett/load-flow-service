@@ -51,5 +51,4 @@ class SensitivityFactorContainer : FormItemLoadable {
             logger.info { "Received sensitivity factors parameters: ${part.value}" }
         }
     }
-
 }

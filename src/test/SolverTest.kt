@@ -4,6 +4,7 @@ import com.github.statnett.loadflowservice.networkFromFileContent
 import com.powsybl.loadflow.LoadFlowParameters
 import com.powsybl.loadflow.json.JsonLoadFlowParameters
 import org.junit.Test
+import testDataFactory.ieeeCdfNetwork14CgmesFile
 import java.io.ByteArrayInputStream
 import kotlin.test.assertEquals
 
