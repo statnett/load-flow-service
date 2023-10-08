@@ -99,3 +99,11 @@ fun formDataFromFile(file: File): List<PartData> {
         )
     }
 }
+
+fun basicContingencyJson(): String {
+    // Contains names and branches from the create9() case in Powsybl's NetworkFactory
+    return ("{\"type\":\"default\",\"version\":\"1.0\",\"name\":\"list\"," +
+            "\"contingencies\":[{\"id\":\"contingency\",\"elements\":[{\"id\":\"L7-8-0\",\"type\":\"BRANCH\"}," +
+            "{\"id\":\"L9-8-0\",\"type\":\"BRANCH\"}]}," +
+            "{\"id\":\"contingency2\",\"elements\":[{\"id\":\"B1-G\",\"type\":\"GENERATOR\"}]}]}")
+}
