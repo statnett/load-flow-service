@@ -1,6 +1,6 @@
 package testDataFactory
 
-import com.github.statnett.loadflowservice.AutoSerializableSensitivityFactor
+import com.github.statnett.loadflowservice.formItemHandlers.AutoSerializableSensitivityFactor
 import io.ktor.client.request.forms.*
 import io.ktor.http.content.*
 import kotlinx.serialization.Serializable

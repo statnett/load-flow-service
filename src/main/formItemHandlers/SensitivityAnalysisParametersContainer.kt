@@ -1,5 +1,4 @@
-package com.github.statnett.loadflowservice
-
+package com.github.statnett.loadflowservice.formItemHandlers
 
 import com.powsybl.sensitivity.SensitivityAnalysisParameters
 import com.powsybl.sensitivity.json.JsonSensitivityAnalysisParameters
