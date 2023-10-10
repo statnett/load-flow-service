@@ -1,4 +1,4 @@
-import com.github.statnett.loadflowservice.ContingencyListContainer
+import com.github.statnett.loadflowservice.formItemHandlers.ContingencyListContainer
 import com.powsybl.ieeecdf.converter.IeeeCdfNetworkFactory
 import testDataFactory.basicContingencyJson
 import kotlin.test.Test

@@ -1,4 +1,4 @@
-import com.github.statnett.loadflowservice.SensitivityAnalysisParametersContainer
+import com.github.statnett.loadflowservice.formItemHandlers.SensitivityAnalysisParametersContainer
 import kotlin.math.abs
 import kotlin.test.Test
 import kotlin.test.assertTrue

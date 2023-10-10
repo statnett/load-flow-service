@@ -1,4 +1,4 @@
-package com.github.statnett.loadflowservice
+package com.github.statnett.loadflowservice.formItemHandlers
 
 import io.ktor.http.content.*
 

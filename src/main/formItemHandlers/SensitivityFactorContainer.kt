@@ -1,4 +1,4 @@
-package com.github.statnett.loadflowservice
+package com.github.statnett.loadflowservice.formItemHandlers
 
 import com.powsybl.contingency.ContingencyContext
 import com.powsybl.contingency.ContingencyContextType

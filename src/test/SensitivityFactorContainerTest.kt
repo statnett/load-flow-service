@@ -1,4 +1,4 @@
-import com.github.statnett.loadflowservice.SensitivityFactorContainer
+import com.github.statnett.loadflowservice.formItemHandlers.SensitivityFactorContainer
 import testDataFactory.sensitivityFactorList
 import kotlin.test.Test
 import kotlin.test.assertEquals
