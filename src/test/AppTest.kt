@@ -48,7 +48,10 @@ class ApplicationTest {
         "/voltage-level-names",
         "/diagram",
         "/diagram/substation/S1",
-        "/diagram/voltage-level/VL1"
+        "/diagram/voltage-level/VL1",
+        "/generator-names",
+        "/branch-names",
+        "/load-names"
     ).map { url ->
         DynamicTest.dynamicTest("422 when no network is passed to $url") {
             testApplication {
@@ -66,7 +69,10 @@ class ApplicationTest {
         "/voltage-level-names",
         "/diagram",
         "/diagram/substation/S1",
-        "/diagram/voltage-level/VL1"
+        "/diagram/voltage-level/VL1",
+        "/generator-names",
+        "/branch-names",
+        "/load-names"
     ).map { url ->
         DynamicTest.dynamicTest("500 when file content can not be parsed $url") {
             testApplication {
@@ -295,6 +301,29 @@ class ApplicationTest {
             }
         }
     }
+
+    @TestFactory
+    fun `test response 200 and that known substring is part of the body`() = listOf(
+        mapOf("url" to "/generator-names", "content-substring" to "B1-G"),
+        mapOf("url" to "/load-names", "content-substring" to "B2-L"),
+        mapOf("url" to "/branch-names", "content-substring" to "L7-8-1")
+    ).map { args ->
+        DynamicTest.dynamicTest("Test ${args["url"]}") {
+            testApplication {
+                val response = client.submitFormWithBinaryData(
+                    url = args["url"]!!,
+                    formData = sensitivityFormData.network
+                )
+
+                assertEquals(HttpStatusCode.OK, response.status)
+                val body = response.bodyAsText()
+                assertTrue(body.contains(args["content-substring"]!!))
+                assertEquals("application/json; charset=UTF-8", response.headers["content-type"])
+            }
+        }
+    }
+
+
 }
 
 

@@ -52,6 +52,36 @@ fun Application.module() {
             }
         }
 
+        post("/generator-names") {
+            val files = multiPartDataHandler(call.receiveMultipart())
+            if (files.isEmpty()) {
+                call.response.status(HttpStatusCode.UnprocessableEntity)
+            } else {
+                val network = networkFromFileContent(files[0])
+                call.respond(generatorNames(network))
+            }
+        }
+
+        post("/load-names") {
+            val files = multiPartDataHandler(call.receiveMultipart())
+            if (files.isEmpty()) {
+                call.response.status(HttpStatusCode.UnprocessableEntity)
+            } else {
+                val network = networkFromFileContent(files[0])
+                call.respond(loadNames(network))
+            }
+        }
+
+        post("/branch-names") {
+            val files = multiPartDataHandler(call.receiveMultipart())
+            if (files.isEmpty()) {
+                call.response.status(HttpStatusCode.UnprocessableEntity)
+            } else {
+                val network = networkFromFileContent(files[0])
+                call.respond(branchNames(network))
+            }
+        }
+
         get("/default-load-parameters") {
             call.respondText(defaultLoadFlowParameters(), ContentType.Application.Json, HttpStatusCode.OK)
         }
