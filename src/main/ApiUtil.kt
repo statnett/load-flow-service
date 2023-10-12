@@ -94,3 +94,15 @@ fun substationNames(network: Network): List<String> {
 fun voltageLevelNames(network: Network): List<String> {
     return network.voltageLevels.map { voltageLevel -> voltageLevel.nameOrId }.toList()
 }
+
+fun generatorNames(network: Network): List<String> {
+    return network.generators.map { generator -> generator.nameOrId }
+}
+
+fun loadNames(network: Network): List<String> {
+    return network.loads.map { load -> load.nameOrId }
+}
+
+fun branchNames(network: Network): List<String> {
+    return network.lines.map { line -> line.nameOrId }
+}
