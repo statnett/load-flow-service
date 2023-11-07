@@ -5,7 +5,7 @@
     <version>0.0.0</version>
     <properties>
         <kotlin.version>1.9.10</kotlin.version>
-        <ktor.version>2.3.5</ktor.version>
+        <ktor.version>2.3.6</ktor.version>
         <main.class>com.github.statnett.loadflowservice.AppKt</main.class>
         <kotlin.code.style>official</kotlin.code.style>
     </properties>
