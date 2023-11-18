@@ -62,8 +62,9 @@ fun Application.module() {
             call.respond(branchNames(network))
         }
 
-        get("/default-load-parameters") {
-            call.respondText(defaultLoadFlowParameters(), ContentType.Application.Json, HttpStatusCode.OK)
+        get("/default-values/{parameter-set}") {
+            val parameterSet = call.parameters["parameter-set"] ?: ""
+            call.respondText(defaultParameterSet(parameterSet))
         }
 
         post("/substation-names") {

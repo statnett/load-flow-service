@@ -1,7 +1,10 @@
 package com.github.statnett.loadflowservice
 
+import com.fasterxml.jackson.databind.ObjectMapper
 import com.powsybl.iidm.network.Network
 import com.powsybl.nad.NetworkAreaDiagram
+import com.powsybl.sensitivity.SensitivityAnalysisParameters
+import com.powsybl.sensitivity.json.SensitivityJsonModule
 import com.powsybl.sld.SingleLineDiagram
 import com.powsybl.sld.SldParameters
 import io.github.oshai.kotlinlogging.KotlinLogging
@@ -105,4 +108,31 @@ fun loadNames(network: Network): List<String> {
 
 fun branchNames(network: Network): List<String> {
     return network.lines.map { line -> line.nameOrId }
+}
+
+fun defaultSensitivityAnalysisParameters(): String {
+    val mapper = ObjectMapper()
+    mapper.registerModule(SensitivityJsonModule())
+    return mapper.writeValueAsString(SensitivityAnalysisParameters())
+}
+
+class InvalidParameterSet(message: String) : Exception(message)
+
+fun defaultParameterSet(name: String): String {
+    val loadParams = "load-params"
+    val sensitivityAnalysisParams = "sensitivity-analysis-params"
+    return when (name) {
+        loadParams -> {
+            defaultLoadFlowParameters()
+        }
+
+        sensitivityAnalysisParams -> {
+            defaultSensitivityAnalysisParameters()
+        }
+
+        else -> {
+            val allowed = listOf(loadParams, sensitivityAnalysisParams)
+            throw InvalidParameterSet("Unknown parameters set $name. Must be one of $allowed")
+        }
+    }
 }
