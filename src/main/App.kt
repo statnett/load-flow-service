@@ -27,10 +27,7 @@ fun Application.module() {
 
     install(StatusPages) {
         exception<Throwable> { call, cause ->
-            call.respondText(
-                "500: $cause.\nStack trace: ${cause.stackTraceToString()}",
-                status = HttpStatusCode.InternalServerError
-            )
+            ExceptionHandler().handle(call, cause)
         }
     }
 
@@ -43,43 +40,26 @@ fun Application.module() {
 
         post("/buses") {
             val files = multiPartDataHandler(call.receiveMultipart())
-
-            if (files.isEmpty()) {
-                call.response.status(HttpStatusCode.UnprocessableEntity)
-            } else {
-                val busProps = busesFromRequest(files[0])
-                call.respond(busProps)
-            }
+            val network = networkFromFirstFile(files)
+            call.respond(busPropertiesFromNetwork(network))
         }
 
         post("/generator-names") {
             val files = multiPartDataHandler(call.receiveMultipart())
-            if (files.isEmpty()) {
-                call.response.status(HttpStatusCode.UnprocessableEntity)
-            } else {
-                val network = networkFromFileContent(files[0])
-                call.respond(generatorNames(network))
-            }
+            val network = networkFromFirstFile(files)
+            call.respond(generatorNames(network))
         }
 
         post("/load-names") {
             val files = multiPartDataHandler(call.receiveMultipart())
-            if (files.isEmpty()) {
-                call.response.status(HttpStatusCode.UnprocessableEntity)
-            } else {
-                val network = networkFromFileContent(files[0])
-                call.respond(loadNames(network))
-            }
+            val network = networkFromFirstFile(files)
+            call.respond(loadNames(network))
         }
 
         post("/branch-names") {
             val files = multiPartDataHandler(call.receiveMultipart())
-            if (files.isEmpty()) {
-                call.response.status(HttpStatusCode.UnprocessableEntity)
-            } else {
-                val network = networkFromFileContent(files[0])
-                call.respond(branchNames(network))
-            }
+            val network = networkFromFirstFile(files)
+            call.respond(branchNames(network))
         }
 
         get("/default-load-parameters") {
@@ -88,59 +68,40 @@ fun Application.module() {
 
         post("/substation-names") {
             val files = multiPartDataHandler(call.receiveMultipart())
-            if (files.isEmpty()) {
-                call.response.status(HttpStatusCode.UnprocessableEntity)
-            } else {
-                val network = networkFromFileContent(files[0])
-                call.respond(substationNames(network))
-            }
+            val network = networkFromFirstFile(files)
+            call.respond(substationNames(network))
         }
 
         post("/voltage-level-names") {
             val files = multiPartDataHandler(call.receiveMultipart())
-            if (files.isEmpty()) {
-                call.response.status(HttpStatusCode.UnprocessableEntity)
-            } else {
-                val network = networkFromFileContent(files[0])
-                call.respond(voltageLevelNames(network))
-            }
+            val network = networkFromFirstFile(files)
+            call.respond(voltageLevelNames(network))
         }
 
         post("/run-load-flow") {
             val paramContainer = LoadParameterContainer()
             val files = multiPartDataHandler(call.receiveMultipart(), paramContainer::formItemHandler)
-
-            if (files.isEmpty()) {
-                call.response.status(HttpStatusCode.UnprocessableEntity)
-            } else {
-                val network = networkFromFileContent(files[0])
-                val result = solve(network, paramContainer.parameters)
-                call.respond(result)
-            }
+            val network = networkFromFirstFile(files)
+            val result = solve(network, paramContainer.parameters)
+            call.respond(result)
         }
 
         post("/diagram/{type}/{name}") {
             val diagramType = getDiagramType(call.parameters["type"] ?: DiagramType.Generic.toString())
             val name = call.parameters["name"] ?: ""
             val files = multiPartDataHandler((call.receiveMultipart()))
-            if (files.isEmpty()) {
-                call.response.status(HttpStatusCode.UnprocessableEntity)
-            } else {
-                val network = networkFromFileContent(files[0])
-                val diagram = singleLineDiagram(diagramType, name, network)
-                call.respondText(diagram, ContentType.Image.SVG, HttpStatusCode.OK)
-            }
+
+            val network = networkFromFirstFile(files)
+            val diagram = singleLineDiagram(diagramType, name, network)
+            call.respondText(diagram, ContentType.Image.SVG, HttpStatusCode.OK)
+
         }
 
         post("/diagram") {
             val files = multiPartDataHandler((call.receiveMultipart()))
-            if (files.isEmpty()) {
-                call.response.status(HttpStatusCode.UnprocessableEntity)
-            } else {
-                val network = networkFromFileContent(files[0])
-                val diagram = networkDiagram(network)
-                call.respondText(diagram, ContentType.Image.SVG, HttpStatusCode.OK)
-            }
+            val network = networkFromFirstFile(files)
+            val diagram = networkDiagram(network)
+            call.respondText(diagram, ContentType.Image.SVG, HttpStatusCode.OK)
         }
 
         post("/sensitivity-analysis") {
@@ -151,19 +112,16 @@ fun Application.module() {
             val itemHandler = MultiFormItemLoaders(listOf(loadParamCnt, sensParamCnt, sensFactorCnt, contingencyCnt))
 
             val files = multiPartDataHandler(call.receiveMultipart(), itemHandler::formItemHandler)
-            if (files.isEmpty()) {
-                call.response.status(HttpStatusCode.UnprocessableEntity)
-            } else {
-                sensParamCnt.parameters.setLoadFlowParameters(loadParamCnt.parameters)
-                val network = networkFromFileContent(files[0])
-                val result = runSensitivityAnalysis(
-                    network,
-                    sensFactorCnt.factors,
-                    sensParamCnt.parameters,
-                    contingencyCnt.contingencies
-                )
-                call.respondText(result, ContentType.Application.Json, HttpStatusCode.OK)
-            }
+
+            sensParamCnt.parameters.setLoadFlowParameters(loadParamCnt.parameters)
+            val network = networkFromFirstFile(files)
+            val result = runSensitivityAnalysis(
+                network,
+                sensFactorCnt.factors,
+                sensParamCnt.parameters,
+                contingencyCnt.contingencies
+            )
+            call.respondText(result, ContentType.Application.Json, HttpStatusCode.OK)
         }
         swaggerUI(path = "openapi", swaggerFile = "openapi/documentation.yaml")
     }
