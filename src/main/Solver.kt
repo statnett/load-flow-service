@@ -31,6 +31,15 @@ fun warnOnFewAvailableImporters() {
     }
 }
 
+class NoFileProvidedException(message: String): Exception(message)
+
+fun networkFromFirstFile(files: List<FileContent>): Network {
+    if (files.isEmpty()) {
+        throw NoFileProvidedException("No file with model data provided")
+    }
+    return networkFromFileContent(files[0])
+}
+
 // This function follows closely the functionality implemented in Powsybl-core Network.read
 // However, here we create the ReadOnlyMemDataSource our self which supports constructing it
 // from a zip archive (e.g. CIM/XML files zipped).
