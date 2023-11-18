@@ -108,7 +108,7 @@ class ApplicationTest {
     @Test
     fun `test default load parameters`() =
         testApplication {
-            val response = client.get("/default-load-parameters")
+            val response = client.get("/default-values/load-params")
             assertEquals(response.status, HttpStatusCode.OK)
 
             val body: String = response.bodyAsText()
@@ -320,6 +320,26 @@ class ApplicationTest {
                 assertTrue(body.contains(args["content-substring"]!!))
                 assertEquals("application/json; charset=UTF-8", response.headers["content-type"])
             }
+        }
+    }
+
+    @Test
+    fun `test response 200 and some known content for default sensitivity parameters`() {
+        testApplication {
+            val response = client.get("/default-values/sensitivity-analysis-params")
+            assertEquals(HttpStatusCode.OK, response.status)
+            val body = response.bodyAsText()
+            assertTrue(body.contains("flow-voltage-sensitivity-value-threshold"))
+        }
+    }
+
+    @Test
+    fun `test response 404 on unknown parameter set`() {
+        testApplication {
+            val response = client.get("/default-values/non-existing-params")
+            assertEquals(HttpStatusCode.NotFound, response.status)
+            val body = response.bodyAsText()
+            assertTrue(body.contains("InvalidParameterSet"))
         }
     }
 

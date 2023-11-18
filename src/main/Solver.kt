@@ -31,7 +31,7 @@ fun warnOnFewAvailableImporters() {
     }
 }
 
-class NoFileProvidedException(message: String): Exception(message)
+class NoFileProvidedException(message: String) : Exception(message)
 
 fun networkFromFirstFile(files: List<FileContent>): Network {
     if (files.isEmpty()) {
