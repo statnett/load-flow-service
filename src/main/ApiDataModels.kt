@@ -1,7 +1,16 @@
 package com.github.statnett.loadflowservice
 
+import com.fasterxml.jackson.databind.ObjectMapper
 import com.powsybl.iidm.network.Network
+import com.powsybl.security.SecurityAnalysisResult
+import com.powsybl.security.json.SecurityAnalysisJsonModule
+import kotlinx.serialization.KSerializer
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.descriptors.PrimitiveKind
+import kotlinx.serialization.descriptors.PrimitiveSerialDescriptor
+import kotlinx.serialization.descriptors.SerialDescriptor
+import kotlinx.serialization.encoding.Decoder
+import kotlinx.serialization.encoding.Encoder
 
 /**
  * Class for holding properties from the PowsbyBl bus class that are
@@ -59,3 +68,10 @@ fun branchPropertiesFromNetwork(network: Network): List<LineProperties> {
         )
     }.toList()
 }
+
+@Serializable
+data class LoadFlowServiceSecurityAnalysisResult(
+    @Serializable(with = SecurityAnalysisResultSerializer::class)
+    val securityAnalysisResult: SecurityAnalysisResult,
+    val report: String
+)

@@ -1,6 +1,10 @@
 package com.github.statnett.loadflowservice
 
 import com.github.statnett.loadflowservice.formItemHandlers.*
+import com.powsybl.security.action.Action
+import com.powsybl.security.interceptors.SecurityAnalysisInterceptor
+import com.powsybl.security.monitor.StateMonitor
+import com.powsybl.security.strategy.OperatorStrategy
 import io.ktor.http.*
 import io.ktor.serialization.kotlinx.json.*
 import io.ktor.server.application.*
@@ -100,6 +104,35 @@ fun Application.module() {
                 contingencyCnt.contingencies
             )
             call.respondText(result, ContentType.Application.Json, HttpStatusCode.OK)
+        }
+
+        post("/security-analysis") {
+            val loadParamCnt = LoadParameterContainer()
+            val securityParamsCnt = SecurityAnalysisParametersContainer()
+            val contingencyCnt = ContingencyListContainer()
+            val itemHandler = MultiFormItemLoaders(listOf(loadParamCnt, securityParamsCnt, contingencyCnt))
+
+            val files = multiPartDataHandler(call.receiveMultipart(), itemHandler::formItemHandler)
+
+            securityParamsCnt.parameters.setLoadFlowParameters(loadParamCnt.parameters)
+            val network = networkFromFirstFile(files)
+
+            // Initialize preliminary empty things in first version
+            val intersceptors: List<SecurityAnalysisInterceptor> = listOf()
+            val operatorStrategies: List<OperatorStrategy> = listOf()
+            val actions: List<Action> = listOf()
+            val monitors: List<StateMonitor> = listOf()
+
+            val result = runSecurityAnalysis(
+                network,
+                securityParamsCnt.parameters,
+                contingencyCnt,
+                intersceptors,
+                operatorStrategies,
+                actions,
+                monitors
+            )
+            call.respond(result)
         }
         swaggerUI(path = "openapi", swaggerFile = "openapi/documentation.yaml")
     }
