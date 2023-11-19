@@ -44,39 +44,16 @@ fun Application.module() {
             call.respond(busPropertiesFromNetwork(network))
         }
 
-        post("/generator-names") {
-            val files = multiPartDataHandler(call.receiveMultipart())
-            val network = networkFromFirstFile(files)
-            call.respond(generatorNames(network))
-        }
-
-        post("/load-names") {
-            val files = multiPartDataHandler(call.receiveMultipart())
-            val network = networkFromFirstFile(files)
-            call.respond(loadNames(network))
-        }
-
-        post("/branch-names") {
-            val files = multiPartDataHandler(call.receiveMultipart())
-            val network = networkFromFirstFile(files)
-            call.respond(branchNames(network))
-        }
-
         get("/default-values/{parameter-set}") {
             val parameterSet = call.parameters["parameter-set"] ?: ""
             call.respondText(defaultParameterSet(parameterSet))
         }
 
-        post("/substation-names") {
+        post("/object-names/{type}") {
             val files = multiPartDataHandler(call.receiveMultipart())
             val network = networkFromFirstFile(files)
-            call.respond(substationNames(network))
-        }
-
-        post("/voltage-level-names") {
-            val files = multiPartDataHandler(call.receiveMultipart())
-            val network = networkFromFirstFile(files)
-            call.respond(voltageLevelNames(network))
+            val type = call.parameters["type"] ?: ""
+            call.respond(modelObjectNames(type, network))
         }
 
         post("/run-load-flow") {

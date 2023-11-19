@@ -1,5 +1,6 @@
 import com.github.statnett.loadflowservice.busPropertiesFromNetwork
 import com.powsybl.ieeecdf.converter.IeeeCdfNetworkFactory
+import io.ktor.client.call.*
 import io.ktor.client.request.*
 import io.ktor.client.request.forms.*
 import io.ktor.client.statement.*
@@ -44,14 +45,14 @@ class ApplicationTest {
     fun `test missing network in form`() = listOf(
         "/buses",
         "/run-load-flow",
-        "/substation-names",
-        "/voltage-level-names",
+        "/object-names/substations",
+        "/object-names/voltage-levels",
         "/diagram",
         "/diagram/substation/S1",
         "/diagram/voltage-level/VL1",
-        "/generator-names",
-        "/branch-names",
-        "/load-names"
+        "/object-names/generators",
+        "/object-names/branches",
+        "/object-names/loads"
     ).map { url ->
         DynamicTest.dynamicTest("422 when no network is passed to $url") {
             testApplication {
@@ -65,14 +66,10 @@ class ApplicationTest {
     fun `test internal server error when file parsing fails`() = listOf(
         "/buses",
         "/run-load-flow",
-        "/substation-names",
-        "/voltage-level-names",
+        "/object-names/substations",
         "/diagram",
         "/diagram/substation/S1",
-        "/diagram/voltage-level/VL1",
-        "/generator-names",
-        "/branch-names",
-        "/load-names"
+        "/diagram/voltage-level/VL1"
     ).map { url ->
         DynamicTest.dynamicTest("500 when file content can not be parsed $url") {
             testApplication {
@@ -233,7 +230,7 @@ class ApplicationTest {
     fun `test 11 substation names extracted`() =
         testApplication {
             val response = client.submitFormWithBinaryData(
-                url = "/substation-names",
+                url = "/object-names/substations",
                 formData = formDataFromFile(ieeeCdfNetwork14File())
             )
             assertEquals(response.status, HttpStatusCode.OK)
@@ -245,7 +242,7 @@ class ApplicationTest {
     fun `test 2 voltage levels extracted`() =
         testApplication {
             val response = client.submitFormWithBinaryData(
-                url = "/voltage-level-names",
+                url = "/object-names/voltage-levels",
                 formData = formDataFromFile(ieeeCdfNetwork14File())
             )
             assertEquals(response.status, HttpStatusCode.OK)
@@ -304,9 +301,9 @@ class ApplicationTest {
 
     @TestFactory
     fun `test response 200 and that known substring is part of the body`() = listOf(
-        mapOf("url" to "/generator-names", "content-substring" to "B1-G"),
-        mapOf("url" to "/load-names", "content-substring" to "B2-L"),
-        mapOf("url" to "/branch-names", "content-substring" to "L7-8-1")
+        mapOf("url" to "/object-names/generators", "content-substring" to "B1-G"),
+        mapOf("url" to "/object-names/loads", "content-substring" to "B2-L"),
+        mapOf("url" to "/object-names/branches", "content-substring" to "L7-8-1")
     ).map { args ->
         DynamicTest.dynamicTest("Test ${args["url"]}") {
             testApplication {
@@ -339,7 +336,21 @@ class ApplicationTest {
             val response = client.get("/default-values/non-existing-params")
             assertEquals(HttpStatusCode.NotFound, response.status)
             val body = response.bodyAsText()
-            assertTrue(body.contains("InvalidParameterSet"))
+            assertTrue(body.contains("UnknownRoute"))
+        }
+    }
+
+    @Test
+    fun `test 404 response on unknown object type`() {
+        testApplication {
+            val response = client.submitFormWithBinaryData(
+                url = "/object-names/non-existing-object-type",
+                formData = sensitivityFormData.network
+            )
+
+            assertEquals(HttpStatusCode.NotFound, response.status)
+            val body = response.bodyAsText()
+            assertTrue(body.contains("UnknownRoute"))
         }
     }
 
