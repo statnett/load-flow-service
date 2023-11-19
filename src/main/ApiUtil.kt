@@ -116,7 +116,7 @@ fun defaultSensitivityAnalysisParameters(): String {
     return mapper.writeValueAsString(SensitivityAnalysisParameters())
 }
 
-class InvalidParameterSet(message: String) : Exception(message)
+class UnknownRouteException(message: String) : Exception(message)
 
 fun defaultParameterSet(name: String): String {
     val loadParams = "load-params"
@@ -132,7 +132,36 @@ fun defaultParameterSet(name: String): String {
 
         else -> {
             val allowed = listOf(loadParams, sensitivityAnalysisParams)
-            throw InvalidParameterSet("Unknown parameters set $name. Must be one of $allowed")
+            throw UnknownRouteException("Unknown parameters set $name. Must be one of $allowed")
+        }
+    }
+}
+
+fun modelObjectNames(name: String, network: Network): List<String> {
+    val substation = "substations"
+    val voltageLevel = "voltage-levels"
+    val generators = "generators"
+    val loads = "loads"
+    val branches = "branches"
+    return when (name) {
+        substation -> {
+            substationNames(network)
+        }
+        voltageLevel -> {
+            voltageLevelNames(network)
+        }
+        generators -> {
+            generatorNames(network)
+        }
+        loads -> {
+            loadNames(network)
+        }
+        branches -> {
+            branchNames(network)
+        }
+        else -> {
+            val allowed = listOf(substation, voltageLevel, generators, loads, branches)
+            throw UnknownRouteException("Unknown object type $name. Must be one of $allowed")
         }
     }
 }

@@ -14,7 +14,7 @@ class ExceptionHandler {
                 )
             }
 
-            is InvalidParameterSet -> {
+            is UnknownRouteException -> {
                 call.respondText(
                     "$cause",
                     status = HttpStatusCode.NotFound
