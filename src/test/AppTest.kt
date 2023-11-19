@@ -354,6 +354,18 @@ class ApplicationTest {
         }
     }
 
+    @Test
+    fun `test default security analysis parameters`() {
+        testApplication {
+            val response = client.get("default-values/security-analysis-params")
+            assertEquals(HttpStatusCode.OK, response.status)
+            val body = response.bodyAsText()
+            assertTrue(body.startsWith("{"))
+            assertTrue(body.endsWith("}"))
+        }
+
+    }
+
 
 }
 

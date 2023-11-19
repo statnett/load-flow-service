@@ -3,6 +3,8 @@ package com.github.statnett.loadflowservice
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.powsybl.iidm.network.Network
 import com.powsybl.nad.NetworkAreaDiagram
+import com.powsybl.security.SecurityAnalysisParameters
+import com.powsybl.security.json.SecurityAnalysisJsonModule
 import com.powsybl.sensitivity.SensitivityAnalysisParameters
 import com.powsybl.sensitivity.json.SensitivityJsonModule
 import com.powsybl.sld.SingleLineDiagram
@@ -116,11 +118,18 @@ fun defaultSensitivityAnalysisParameters(): String {
     return mapper.writeValueAsString(SensitivityAnalysisParameters())
 }
 
+fun defaultSecurityAnalysisParameters(): String {
+    val mapper = ObjectMapper()
+    mapper.registerModule(SecurityAnalysisJsonModule())
+    return mapper.writeValueAsString(SecurityAnalysisParameters())
+}
+
 class UnknownRouteException(message: String) : Exception(message)
 
 fun defaultParameterSet(name: String): String {
     val loadParams = "load-params"
     val sensitivityAnalysisParams = "sensitivity-analysis-params"
+    val securityAnalysisParams = "security-analysis-params"
     return when (name) {
         loadParams -> {
             defaultLoadFlowParameters()
@@ -128,6 +137,10 @@ fun defaultParameterSet(name: String): String {
 
         sensitivityAnalysisParams -> {
             defaultSensitivityAnalysisParameters()
+        }
+
+        securityAnalysisParams -> {
+            defaultSecurityAnalysisParameters()
         }
 
         else -> {
