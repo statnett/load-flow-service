@@ -1,15 +1,28 @@
 package com.github.statnett.loadflowservice
 
+import com.fasterxml.jackson.databind.ObjectMapper
 import com.powsybl.commons.PowsyblException
 import com.powsybl.commons.json.JsonUtil
 import com.powsybl.commons.reporter.Reporter
 import com.powsybl.commons.reporter.ReporterModel
 import com.powsybl.computation.local.LocalComputationManager
+import com.powsybl.contingency.ContingenciesProvider
 import com.powsybl.contingency.contingency.list.ContingencyList
 import com.powsybl.iidm.network.*
 import com.powsybl.loadflow.LoadFlow
 import com.powsybl.loadflow.LoadFlowParameters
 import com.powsybl.loadflow.json.JsonLoadFlowParameters
+import com.powsybl.security.LimitViolationFilter
+import com.powsybl.security.SecurityAnalysis
+import com.powsybl.security.SecurityAnalysisParameters
+import com.powsybl.security.SecurityAnalysisReport
+import com.powsybl.security.SecurityAnalysisResult
+import com.powsybl.security.action.Action
+import com.powsybl.security.detectors.DefaultLimitViolationDetector
+import com.powsybl.security.interceptors.SecurityAnalysisInterceptor
+import com.powsybl.security.json.SecurityAnalysisJsonModule
+import com.powsybl.security.monitor.StateMonitor
+import com.powsybl.security.strategy.OperatorStrategy
 import com.powsybl.sensitivity.*
 import io.github.oshai.kotlinlogging.KotlinLogging
 import java.io.ByteArrayOutputStream
@@ -141,4 +154,31 @@ fun runSensitivityAnalysis(
     jsonGenerator.writeEndObject()
     jsonGenerator.close()
     return writer.toString()
+}
+
+fun runSecurityAnalysis(
+    network: Network,
+    params: SecurityAnalysisParameters,
+    contingencies: ContingenciesProvider,
+    intersceptors: List<SecurityAnalysisInterceptor>,
+    operatorStrategies: List<OperatorStrategy>,
+    actions: List<Action>,
+    monitors: List<StateMonitor>
+): LoadFlowServiceSecurityAnalysisResult {
+    val reporter = ReporterModel("security", "")
+    val securityReport = SecurityAnalysis.run(
+        network,
+        network.variantManager.workingVariantId,
+        contingencies,
+        params,
+        LocalComputationManager.getDefault(),
+        LimitViolationFilter.load(),
+        DefaultLimitViolationDetector(),
+        intersceptors,
+        operatorStrategies,
+        actions,
+        monitors,
+        reporter
+    )
+    return LoadFlowServiceSecurityAnalysisResult(securityReport.result, reporterToString(reporter))
 }

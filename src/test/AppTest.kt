@@ -1,3 +1,4 @@
+import com.github.statnett.loadflowservice.LoadFlowServiceSecurityAnalysisResult
 import com.github.statnett.loadflowservice.busPropertiesFromNetwork
 import com.powsybl.ieeecdf.converter.IeeeCdfNetworkFactory
 import io.ktor.client.call.*
@@ -6,6 +7,7 @@ import io.ktor.client.request.forms.*
 import io.ktor.client.statement.*
 import io.ktor.http.*
 import io.ktor.server.testing.*
+import kotlinx.serialization.json.Json
 import org.junit.jupiter.api.DynamicTest
 import org.junit.jupiter.api.TestFactory
 import testDataFactory.*
@@ -18,6 +20,7 @@ import kotlin.test.assertTrue
 class ApplicationTest {
     // Holds various form data variants for the sensitivity-analysis end-point
     val sensitivityFormData = SensitivityAnalysisFormDataContainer()
+    val securityFormData = SecurityAnalysisFormDataContainer()
 
     @Test
     fun testRoot() =
@@ -364,6 +367,21 @@ class ApplicationTest {
             assertTrue(body.endsWith("}"))
         }
 
+    }
+
+    @Test
+    fun `test 200 for simple security analysis`() {
+        testApplication {
+            val response = client.submitFormWithBinaryData(
+                url = "/security-analysis",
+                formData = securityFormData.formData()
+            )
+            assertEquals(HttpStatusCode.OK, response.status)
+            val result = Json.decodeFromString<LoadFlowServiceSecurityAnalysisResult>(response.body())
+            assertTrue(result.report.isNotEmpty())
+            // There are two contingencies
+            assertEquals(2, result.securityAnalysisResult.postContingencyResults.size)
+        }
     }
 
 

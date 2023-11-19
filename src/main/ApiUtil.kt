@@ -160,18 +160,23 @@ fun modelObjectNames(name: String, network: Network): List<String> {
         substation -> {
             substationNames(network)
         }
+
         voltageLevel -> {
             voltageLevelNames(network)
         }
+
         generators -> {
             generatorNames(network)
         }
+
         loads -> {
             loadNames(network)
         }
+
         branches -> {
             branchNames(network)
         }
+
         else -> {
             val allowed = listOf(substation, voltageLevel, generators, loads, branches)
             throw UnknownRouteException("Unknown object type $name. Must be one of $allowed")
