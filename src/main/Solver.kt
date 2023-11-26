@@ -21,6 +21,7 @@ import com.powsybl.security.monitor.StateMonitor
 import com.powsybl.security.strategy.OperatorStrategy
 import com.powsybl.sensitivity.*
 import io.github.oshai.kotlinlogging.KotlinLogging
+import kotlinx.serialization.Serializable
 import java.io.ByteArrayOutputStream
 import java.io.StringWriter
 
@@ -112,44 +113,32 @@ fun solve(
     )
 }
 
+
 fun runSensitivityAnalysis(
     network: Network,
     factors: List<SensitivityFactor>,
     params: SensitivityAnalysisParameters,
     contingenciesList: ContingencyList
-): String {
+): LoadFlowServiceSensitivityAnalysisResult {
     val reporter = ReporterModel("sensitivity", "")
     val variableSets: List<SensitivityVariableSet> = listOf()
     val contingencies = contingenciesList.getContingencies(network)
-    val factorReader = SensitivityFactorModelReader(factors, network)
 
-    val factory = JsonUtil.createJsonFactory()
-    val writer = StringWriter()
-    val jsonGenerator = factory.createGenerator(writer)
-    jsonGenerator.writeStartObject()
-    jsonGenerator.writeFieldName("sensitivity-results")
-    val resultWriter = SensitivityResultJsonWriter(jsonGenerator, contingencies)
 
-    SensitivityAnalysis.run(
+
+    val result = SensitivityAnalysis.run(
         network,
         network.variantManager.workingVariantId,
-        factorReader,
-        resultWriter,
+        factors,
         contingencies,
         variableSets,
         params,
         LocalComputationManager.getDefault(),
         reporter
     )
-    // Close the nested array created by Powsybl
-    jsonGenerator.writeEndArray()
-    jsonGenerator.writeEndArray()
-
-    // Add run report to the JSON
-    jsonGenerator.writeStringField("report", reporterToString(reporter))
-    jsonGenerator.writeEndObject()
-    jsonGenerator.close()
-    return writer.toString()
+    return LoadFlowServiceSensitivityAnalysisResult(
+        result, reporterToString(reporter)
+    )
 }
 
 fun runSecurityAnalysis(

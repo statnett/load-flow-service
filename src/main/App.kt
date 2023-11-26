@@ -98,13 +98,15 @@ fun Application.module() {
 
             sensParamCnt.parameters.setLoadFlowParameters(loadParamCnt.parameters)
             val network = networkFromFirstFile(files)
-            val result = runSensitivityAnalysis(
-                network,
-                sensFactorCnt.factors,
-                sensParamCnt.parameters,
-                contingencyCnt.contingencies
-            )
-            call.respondText(result, ContentType.Application.Json, HttpStatusCode.OK)
+            val result = createTask(taskManager) {
+                runSensitivityAnalysis(
+                    network,
+                    sensFactorCnt.factors,
+                    sensParamCnt.parameters,
+                    contingencyCnt.contingencies
+                )
+            }
+            call.respond(result)
         }
 
         post("/security-analysis") {
