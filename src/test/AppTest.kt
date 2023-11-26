@@ -1,3 +1,4 @@
+import com.github.statnett.loadflowservice.LoadFlowResultForApi
 import com.github.statnett.loadflowservice.LoadFlowServiceSecurityAnalysisResult
 import com.github.statnett.loadflowservice.busPropertiesFromNetwork
 import com.powsybl.ieeecdf.converter.IeeeCdfNetworkFactory
@@ -125,13 +126,12 @@ class ApplicationTest {
             )
 
             assertEquals(response.status, HttpStatusCode.OK)
+            val result = Json.decodeFromString<LoadFlowResultForApi>(response.body())
 
-            val body: String = response.bodyAsText()
             val solvedNetwork = IeeeCdfNetworkFactory.create14Solved()
             val angles = busPropertiesFromNetwork(solvedNetwork).map { bus -> bus.angle }.toList()
 
-            val regex = Regex("\"angle\":([0-9.-]+)")
-            val anglesFromJsonStr = regex.findAll(body).map { match -> match.groupValues[1].toDouble() }.toList()
+            val anglesFromJsonStr = result.buses.map {bus -> bus.angle }.toList()
 
             // It seems like the solved version from Powsybl contains rounded angles
             assertTrue(
