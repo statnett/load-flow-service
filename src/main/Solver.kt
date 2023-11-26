@@ -1,6 +1,5 @@
 package com.github.statnett.loadflowservice
 
-import com.fasterxml.jackson.databind.ObjectMapper
 import com.powsybl.commons.PowsyblException
 import com.powsybl.commons.json.JsonUtil
 import com.powsybl.commons.reporter.Reporter
@@ -15,12 +14,9 @@ import com.powsybl.loadflow.json.JsonLoadFlowParameters
 import com.powsybl.security.LimitViolationFilter
 import com.powsybl.security.SecurityAnalysis
 import com.powsybl.security.SecurityAnalysisParameters
-import com.powsybl.security.SecurityAnalysisReport
-import com.powsybl.security.SecurityAnalysisResult
 import com.powsybl.security.action.Action
 import com.powsybl.security.detectors.DefaultLimitViolationDetector
 import com.powsybl.security.interceptors.SecurityAnalysisInterceptor
-import com.powsybl.security.json.SecurityAnalysisJsonModule
 import com.powsybl.security.monitor.StateMonitor
 import com.powsybl.security.strategy.OperatorStrategy
 import com.powsybl.sensitivity.*

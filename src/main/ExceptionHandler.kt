@@ -21,9 +21,16 @@ class ExceptionHandler {
                 )
             }
 
+            is TaskDoesNotExistException -> {
+                call.respondText(
+                    "$cause",
+                    status = HttpStatusCode.NotFound
+                )
+            }
+
             else -> {
                 call.respondText(
-                    "500: $cause.\nStack trace: ${cause.stackTraceToString()}",
+                    "500: $cause. Stack trace: ${cause.stackTraceToString()}",
                     status = HttpStatusCode.InternalServerError
                 )
             }

@@ -1,16 +1,8 @@
 package com.github.statnett.loadflowservice
 
-import com.fasterxml.jackson.databind.ObjectMapper
 import com.powsybl.iidm.network.Network
 import com.powsybl.security.SecurityAnalysisResult
-import com.powsybl.security.json.SecurityAnalysisJsonModule
-import kotlinx.serialization.KSerializer
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.descriptors.PrimitiveKind
-import kotlinx.serialization.descriptors.PrimitiveSerialDescriptor
-import kotlinx.serialization.descriptors.SerialDescriptor
-import kotlinx.serialization.encoding.Decoder
-import kotlinx.serialization.encoding.Encoder
 
 /**
  * Class for holding properties from the PowsbyBl bus class that are
@@ -30,7 +22,7 @@ fun busPropertiesFromNetwork(network: Network): List<BusProperties> {
         .map { bus ->
             BusProperties(
                 id = bus.id,
-                voltage = bus.v,
+                voltage = if (bus.v.isNaN()) bus.voltageLevel.nominalV else bus.v,
                 angle = bus.angle,
                 activePower = bus.p,
                 reactivePower = bus.q,
@@ -51,20 +43,23 @@ data class LineProperties(
 data class TerminalProperties(val activePower: Double, val reactivePower: Double)
 
 @Serializable
+sealed class ComputationResult
+
+@Serializable
 data class LoadFlowResultForApi(
     val isOk: Boolean,
     val buses: List<BusProperties>,
     val branches: List<LineProperties>,
     val report: String
-)
+) : ComputationResult()
 
 fun branchPropertiesFromNetwork(network: Network): List<LineProperties> {
     return network.lines.map { line ->
         LineProperties(
             id = line.id,
             isOverloaded = line.isOverloaded,
-            terminal1 = TerminalProperties(line.terminal1.p, line.terminal1.q),
-            terminal2 = TerminalProperties(line.terminal2.p, line.terminal2.q)
+            terminal1 = TerminalProperties(line.terminal1.p, if (line.terminal1.q.isNaN()) 0.0 else line.terminal1.q),
+            terminal2 = TerminalProperties(line.terminal2.p, if (line.terminal2.q.isNaN()) 0.0 else line.terminal2.q)
         )
     }.toList()
 }
@@ -74,4 +69,4 @@ data class LoadFlowServiceSecurityAnalysisResult(
     @Serializable(with = SecurityAnalysisResultSerializer::class)
     val securityAnalysisResult: SecurityAnalysisResult,
     val report: String
-)
+) : ComputationResult()

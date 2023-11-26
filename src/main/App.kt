@@ -20,6 +20,7 @@ import io.ktor.server.routing.*
 fun main(args: Array<String>): Unit = io.ktor.server.netty.EngineMain.main(args)
 
 fun Application.module() {
+    val taskManager = TaskManager()
     install(ContentNegotiation) {
         json()
     }
@@ -64,7 +65,7 @@ fun Application.module() {
             val paramContainer = LoadParameterContainer()
             val files = multiPartDataHandler(call.receiveMultipart(), paramContainer::formItemHandler)
             val network = networkFromFirstFile(files)
-            val result = solve(network, paramContainer.parameters)
+            val result = createTask(taskManager) { solve(network, paramContainer.parameters) }
             call.respond(result)
         }
 
@@ -123,16 +124,28 @@ fun Application.module() {
             val actions: List<Action> = listOf()
             val monitors: List<StateMonitor> = listOf()
 
-            val result = runSecurityAnalysis(
-                network,
-                securityParamsCnt.parameters,
-                contingencyCnt,
-                intersceptors,
-                operatorStrategies,
-                actions,
-                monitors
-            )
+            val result = createTask(taskManager) {
+                runSecurityAnalysis(
+                    network,
+                    securityParamsCnt.parameters,
+                    contingencyCnt,
+                    intersceptors,
+                    operatorStrategies,
+                    actions,
+                    monitors
+                )
+            }
             call.respond(result)
+        }
+
+        get("/status/{id}") {
+            val id = call.parameters["id"] ?: ""
+            call.respond(taskManager.status(id))
+        }
+
+        get("/result/{id}") {
+            val id = call.parameters["id"] ?: ""
+            taskManager.respondWithResult(call, id)
         }
         swaggerUI(path = "openapi", swaggerFile = "openapi/documentation.yaml")
     }
