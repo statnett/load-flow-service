@@ -1,6 +1,4 @@
-import com.github.statnett.loadflowservice.LoadFlowResultForApi
-import com.github.statnett.loadflowservice.LoadFlowServiceSecurityAnalysisResult
-import com.github.statnett.loadflowservice.busPropertiesFromNetwork
+import com.github.statnett.loadflowservice.*
 import com.powsybl.ieeecdf.converter.IeeeCdfNetworkFactory
 import io.ktor.client.call.*
 import io.ktor.client.request.*
@@ -12,6 +10,7 @@ import kotlinx.serialization.json.Json
 import org.junit.jupiter.api.DynamicTest
 import org.junit.jupiter.api.TestFactory
 import testDataFactory.*
+import testUtils.retryOnError
 import kotlin.math.abs
 import kotlin.test.Test
 import kotlin.test.assertContains
@@ -20,8 +19,13 @@ import kotlin.test.assertTrue
 
 class ApplicationTest {
     // Holds various form data variants for the sensitivity-analysis end-point
-    val sensitivityFormData = SensitivityAnalysisFormDataContainer()
-    val securityFormData = SecurityAnalysisFormDataContainer()
+    private val sensitivityFormData = SensitivityAnalysisFormDataContainer()
+    private val securityFormData = SecurityAnalysisFormDataContainer()
+
+    private val json = Json {
+        ignoreUnknownKeys = true
+    }
+
 
     @Test
     fun testRoot() =
@@ -126,12 +130,22 @@ class ApplicationTest {
             )
 
             assertEquals(response.status, HttpStatusCode.OK)
-            val result = Json.decodeFromString<LoadFlowResultForApi>(response.body())
+            val taskInfo = Json.decodeFromString<TaskInfo>(response.body())
+
+            val statusResponse = client.get(taskInfo.statusUrl)
+            assertEquals(HttpStatusCode.OK, statusResponse.status)
+
+            val resultResponse = retryOnError(50, 20) {
+                client.get(taskInfo.resultUrl)
+            }
+            assertEquals(resultResponse.status, HttpStatusCode.OK)
+
+            val result = json.decodeFromString<LoadFlowResultForApi>(resultResponse.body())
 
             val solvedNetwork = IeeeCdfNetworkFactory.create14Solved()
             val angles = busPropertiesFromNetwork(solvedNetwork).map { bus -> bus.angle }.toList()
 
-            val anglesFromJsonStr = result.buses.map {bus -> bus.angle }.toList()
+            val anglesFromJsonStr = result.buses.map { bus -> bus.angle }.toList()
 
             // It seems like the solved version from Powsybl contains rounded angles
             assertTrue(
@@ -164,13 +178,21 @@ class ApplicationTest {
                 formData = formData + loadParams
             )
 
-            val body = response.bodyAsText()
-            assertEquals(HttpStatusCode.OK, response.status)
+            val taskInfo = json.decodeFromString<TaskInfo>(response.body())
 
-            val regex = Regex("\"isOk\":([^,]+)")
-            val match = regex.find(body)!!
-            val solveStatus = match.groupValues[1].toBoolean()
-            assertTrue(solveStatus)
+            val statusResponse = client.get(taskInfo.statusUrl)
+            assertEquals(HttpStatusCode.OK, statusResponse.status)
+            val status = json.decodeFromString<TaskStatusResponse>(statusResponse.body())
+            assertEquals("RUNNING", status.status)
+
+            val resultResponse = retryOnError(50, 10) {
+                client.get(taskInfo.resultUrl)
+            }
+            assertEquals(HttpStatusCode.OK, resultResponse.status)
+
+            val apiResult = json.decodeFromString<LoadFlowResultForApi>(resultResponse.body())
+            assertEquals(HttpStatusCode.OK, response.status)
+            assertTrue(apiResult.isOk)
         }
 
     @Test
@@ -377,7 +399,14 @@ class ApplicationTest {
                 formData = securityFormData.formData()
             )
             assertEquals(HttpStatusCode.OK, response.status)
-            val result = Json.decodeFromString<LoadFlowServiceSecurityAnalysisResult>(response.body())
+            val taskInfo = Json.decodeFromString<TaskInfo>(response.body())
+
+            val runResult = retryOnError(50, 10) {
+                client.get(taskInfo.resultUrl)
+            }
+            assertEquals(HttpStatusCode.OK, runResult.status)
+
+            val result = json.decodeFromString<LoadFlowServiceSecurityAnalysisResult>(runResult.body())
             assertTrue(result.report.isNotEmpty())
             // There are two contingencies
             assertEquals(2, result.securityAnalysisResult.postContingencyResults.size)

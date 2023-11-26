@@ -2,8 +2,8 @@ import com.github.statnett.loadflowservice.LoadFlowServiceSecurityAnalysisResult
 import com.github.statnett.loadflowservice.busPropertiesFromNetwork
 import com.powsybl.ieeecdf.converter.IeeeCdfNetworkFactory
 import com.powsybl.security.SecurityAnalysisResult
-import kotlinx.serialization.json.Json
 import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
