@@ -310,16 +310,21 @@ class ApplicationTest {
                     formData = sensitivityFormData.formData(config)
                 )
                 assertEquals(HttpStatusCode.OK, response.status)
-                val body = response.bodyAsText()
+
+                val taskInfo = Json.decodeFromString<TaskInfo>(response.body())
+
+                val runResult = retryOnError(50, 10) {
+                    client.get(taskInfo.resultUrl)
+                }
+                assertEquals(HttpStatusCode.OK, runResult.status)
+
+                val result = json.decodeFromString<LoadFlowServiceSensitivityAnalysisResult>(runResult.body())
 
                 // There are two contingencies so when we have contingencies there should be three results
                 // Otherwise one
                 val numRes = if (config.withContingencies) 3 else 1
 
-                val regex = Regex(""""sensitivity-results":\[\[(.*)]]""")
-                val match = regex.find(body)!!
-                val content = match.groupValues[1]
-                assertEquals(numRes, content.count { c -> c == '{' })
+                assertEquals(numRes, result.sensitivityAnalysisResult.values.size)
             }
         }
     }

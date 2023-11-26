@@ -2,6 +2,7 @@ package com.github.statnett.loadflowservice
 
 import com.powsybl.iidm.network.Network
 import com.powsybl.security.SecurityAnalysisResult
+import com.powsybl.sensitivity.SensitivityAnalysisResult
 import kotlinx.serialization.Serializable
 
 /**
@@ -70,3 +71,11 @@ data class LoadFlowServiceSecurityAnalysisResult(
     val securityAnalysisResult: SecurityAnalysisResult,
     val report: String
 ) : ComputationResult()
+
+
+@Serializable
+data class LoadFlowServiceSensitivityAnalysisResult(
+    @Serializable(with = SensitivityAnalysisResultSerializer::class)
+    val sensitivityAnalysisResult: SensitivityAnalysisResult,
+    val report: String
+): ComputationResult()
