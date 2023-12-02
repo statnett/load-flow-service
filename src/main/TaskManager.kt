@@ -1,5 +1,6 @@
 package com.github.statnett.loadflowservice
 
+import io.github.oshai.kotlinlogging.KotlinLogging
 import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.response.*
@@ -8,6 +9,10 @@ import kotlinx.serialization.Serializable
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import java.util.*
+import kotlin.time.DurationUnit
+import kotlin.time.toDuration
+
+private val logger = KotlinLogging.logger { }
 
 enum class TaskStatus {
     CREATED, RUNNING, FINISHED, FAILED
@@ -18,6 +23,7 @@ class Task {
     var result: ComputationResult? = null
     val id = UUID.randomUUID().toString()
     var exception: Exception? = null
+    var scheduledForDeletion = false
     private val createdAt = System.currentTimeMillis()
 
     fun ageSeconds(): Int {
@@ -50,11 +56,16 @@ class TaskQueue {
     }
 
     fun clearOlderThan(ageSeconds: Int) {
-        tasks.removeIf { t -> (t.ageSeconds() > ageSeconds) and (t.status != TaskStatus.RUNNING)}
+        tasks.removeIf { t -> (t.ageSeconds() > ageSeconds) and (t.status != TaskStatus.RUNNING) }
     }
 
     fun numRunning(): Int {
         return tasks.count { t -> t.status == TaskStatus.RUNNING }
+    }
+
+    fun setDeleteStatus(id: String) {
+        val task = get(id) ?: return
+        task.scheduledForDeletion = true
     }
 }
 
@@ -117,8 +128,12 @@ class TaskManager(private val maxRunningTasks: Int = 100, private val retention:
     }
 
     suspend fun scheduleTaskDeletion(id: String) {
-        delay((retention*1000).toLong())
+        val timeUntilDelete = retention.toDuration(DurationUnit.SECONDS)
+        logger.info { "Deleting task $id in $timeUntilDelete" }
+        queue.setDeleteStatus(id)
+        delay(timeUntilDelete)
         queue.remove(id)
+        logger.info { "Deleted task $id" }
     }
 
 }
