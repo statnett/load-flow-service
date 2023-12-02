@@ -8,6 +8,7 @@ import junit.framework.TestCase.assertTrue
 import java.util.concurrent.TimeUnit
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertNotNull
 
 class TestTaskCreator {
     @Test
@@ -25,5 +26,25 @@ class TestTaskCreator {
         assertEquals(TaskStatus.FINISHED.name, taskStatusResponse.status)
         assertTrue(taskInfo.statusUrl.endsWith(taskInfo.id))
         assertTrue(taskInfo.resultUrl.endsWith(taskInfo.id))
+        val task = tm.queue.get(taskInfo.id)
+        assertNotNull(task)
+        assertTrue(task.scheduledForDeletion)
+    }
+
+    @Test
+    fun `test scheduled for deletion when exception occur`() {
+        val tm = TaskManager()
+        val msg = "Something unexpected happened!"
+        val taskInfo = createTask(tm) {
+            throw RuntimeException(msg)
+        }
+
+        // Small sleep to be absolutely sure that the thread was finished
+        TimeUnit.MILLISECONDS.sleep(50L)
+        val task = tm.queue.get(taskInfo.id)
+        assertNotNull(task)
+        assertTrue(task.scheduledForDeletion)
+        assertNotNull(task.exception)
+        assertTrue(tm.status(taskInfo.id).message.contains(msg))
     }
 }
