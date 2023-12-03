@@ -15,6 +15,9 @@ jobs:
     name: Publish Docker Image to Docker Hub
     runs-on: ubuntu-latest
     if: github.repository_owner == 'statnett'
+    permissions:
+      contents: read # for actions/checkout to fetch code
+      packages: write # for docker/build-push-action to push images
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
