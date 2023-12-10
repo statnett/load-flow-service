@@ -7,26 +7,6 @@ servers:
   - url: "http://0.0.0.0:8080"
   - url: "http://devbox:8080"
 paths:
-  /buses:
-    post:
-      operationId: buses
-      description: "Return all buses in the network"
-      requestBody:
-        $ref: "#/components/networkFile"
-      responses:
-        200:
-          description: "List with all buses in the network"
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: "#/components/schemas/Bus"
-        422:
-          $ref: "#/components/missingNetworkFileResponse"
-        500:
-          $ref: "#/components/internalError"
-
   /default-load-parameters:
     get:
       description: "Get default parameters for the load flow calculation"
@@ -36,60 +16,33 @@ paths:
           content:
             application/json:
               type: object
-  /substation-names:
-    post:
-      description: "List all substation names in the network. These names can for instance be used in the diagram methods"
-      requestBody:
-        $ref: "#/components/networkFile"
-      responses:
-        200:
-          description: "List with all substation names"
-          content:
-            application/json:
-              type: array
-              items:
-                type: string
-        422:
-          $ref: "#/components/missingNetworkFileResponse"
-        500:
-          $ref: "#/components/internalError"
 
-  /voltage-levels:
+  /object-names/{object-type}:
     post:
-      description: "List all voltage levels in the network. These names can for instance be used in the diagram methods"
+      description: "Extracts names for the given object"
       requestBody:
         $ref: "#/components/networkFile"
       responses:
         200:
-          description: "List with all voltage levels"
+          description: "List with names of the specified object type"
           content:
             application/json:
-              type: array
-              items:
-                type: string
+              type: object
+        404:
+          description: "Object type is not known"
+          content:
+            text/plain:
+              type: string
         422:
           $ref: "#/components/missingNetworkFileResponse"
-        500:
-          $ref: "#/components/internalError"
+
 
   /run-load-flow:
     post:
       description: "Run load flow calculation"
       requestBody:
-        description: "Form with network data sent as file"
-        required: true
-        content:
-          multipart/form-data:
-            schema:
-              type: object
-              properties:
-                network:
-                  type: string
-                  format: binary
-                load-parameters:
-                  type: string
-            required:
-              - network
+        requestBody:
+          $ref: "#/components/networkFile"
 
       responses:
         200:
