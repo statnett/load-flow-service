@@ -29,6 +29,13 @@
             <version>2023.3.3</version>
         </dependency>
 
+        <!-- Force sensitivity analysis api one version higher. Can probably be removed in next powsybl-starter release -->
+        <dependency>
+            <groupId>com.powsybl</groupId>
+            <artifactId>powsybl-sensitivity-analysis-api</artifactId>
+            <version>6.1.0</version>
+        </dependency>
+
         <dependency>
             <groupId>io.ktor</groupId>
             <artifactId>ktor-server-core-jvm</artifactId>
