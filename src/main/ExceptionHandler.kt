@@ -28,6 +28,13 @@ class ExceptionHandler {
                 )
             }
 
+            is FullBufferException -> {
+                call.respondText(
+                    "Service is currently unavailable because too many tasks are running.",
+                    status = HttpStatusCode.ServiceUnavailable
+                )
+            }
+
             else -> {
                 call.respondText(
                     "500: $cause. Stack trace: ${cause.stackTraceToString()}",
