@@ -43,12 +43,6 @@ fun Application.module() {
             call.respondText("Hello, world!")
         }
 
-        post("/buses") {
-            val files = multiPartDataHandler(call.receiveMultipart())
-            val network = networkFromFirstFile(files)
-            call.respond(busPropertiesFromNetwork(network))
-        }
-
         get("/default-values/{parameter-set}") {
             val parameterSet = call.parameters["parameter-set"] ?: ""
             call.respondText(defaultParameterSet(parameterSet))
