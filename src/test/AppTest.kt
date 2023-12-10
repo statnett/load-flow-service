@@ -35,23 +35,9 @@ class ApplicationTest {
             assertEquals("Hello, world!", response.bodyAsText())
         }
 
-    @Test
-    fun `test get buses returns 422 on missing file content`() =
-        testApplication {
-            val response =
-                client.submitFormWithBinaryData(
-                    url = "/buses",
-                    formData =
-                    formData {
-                        append("network", "not file content")
-                    },
-                )
-            assertEquals(HttpStatusCode.UnprocessableEntity, response.status)
-        }
 
     @TestFactory
     fun `test missing network in form`() = listOf(
-        "/buses",
         "/run-load-flow",
         "/object-names/substations",
         "/object-names/voltage-levels",
@@ -60,7 +46,8 @@ class ApplicationTest {
         "/diagram/voltage-level/VL1",
         "/object-names/generators",
         "/object-names/branches",
-        "/object-names/loads"
+        "/object-names/loads",
+        "/object-names/buses"
     ).map { url ->
         DynamicTest.dynamicTest("422 when no network is passed to $url") {
             testApplication {
@@ -72,7 +59,6 @@ class ApplicationTest {
 
     @TestFactory
     fun `test internal server error when file parsing fails`() = listOf(
-        "/buses",
         "/run-load-flow",
         "/object-names/substations",
         "/diagram",
@@ -94,20 +80,14 @@ class ApplicationTest {
         testApplication {
             val response =
                 client.submitFormWithBinaryData(
-                    url = "/buses",
+                    url = "/object-names/buses",
                     formData = formDataFromFile(ieeeCdfNetwork14File()),
                 )
             assertEquals(HttpStatusCode.OK, response.status)
             assertEquals(response.headers["Content-Type"], "application/json; charset=UTF-8")
-            val body: String = response.bodyAsText()
+            val names = json.decodeFromString<List<String>>(response.body())
 
-            // Roughly validate content
-            assertTrue(body.startsWith("[{"))
-            assertTrue(body.endsWith("}]"))
-
-            val busString =
-                "{\"id\":\"VL1_0\",\"voltage\":143.1,\"angle\":0.0,\"activePower\":0.0,\"reactivePower\":0.0}"
-            assertContains(body, busString)
+            assertEquals(14, names.size)
         }
 
     @Test
@@ -159,7 +139,7 @@ class ApplicationTest {
     fun `test 14 bus ok`() =
         testApplication {
             val response = client.submitFormWithBinaryData(
-                url = "/buses",
+                url = "/object-names/buses",
                 formData = formDataFromFile(ieeeCdfNetwork14CgmesFile())
             )
             assertEquals(HttpStatusCode.OK, response.status)
@@ -264,7 +244,7 @@ class ApplicationTest {
         }
 
     @Test
-    fun `test 2 voltage levels extracted`() =
+    fun `test 14 voltage levels extracted`() =
         testApplication {
             val response = client.submitFormWithBinaryData(
                 url = "/object-names/voltage-levels",
@@ -292,13 +272,12 @@ class ApplicationTest {
     fun `test read rawx`() =
         testApplication {
             val response = client.submitFormWithBinaryData(
-                url = "/buses",
+                url = "/object-names/buses",
                 formData = formDataMinimalNetworkRawx()
             )
             assertEquals(HttpStatusCode.OK, response.status)
-            val body = response.bodyAsText()
-            val num = body.split("},{").size
-            assertEquals(2, num)
+            val names = json.decodeFromString<List<String>>(response.body())
+            assertEquals(2, names.size)
         }
 
     @TestFactory

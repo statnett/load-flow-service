@@ -112,6 +112,10 @@ fun branchNames(network: Network): List<String> {
     return network.lines.map { line -> line.nameOrId }
 }
 
+fun busNames(network: Network): List<String> {
+    return network.busView.buses.map { bus -> bus.nameOrId }
+}
+
 fun defaultSensitivityAnalysisParameters(): String {
     val mapper = ObjectMapper()
     mapper.registerModule(SensitivityJsonModule())
@@ -156,6 +160,7 @@ fun modelObjectNames(name: String, network: Network): List<String> {
     val generators = "generators"
     val loads = "loads"
     val branches = "branches"
+    val buses = "buses"
     return when (name) {
         substation -> {
             substationNames(network)
@@ -177,8 +182,12 @@ fun modelObjectNames(name: String, network: Network): List<String> {
             branchNames(network)
         }
 
+        buses -> {
+            busNames(network)
+        }
+
         else -> {
-            val allowed = listOf(substation, voltageLevel, generators, loads, branches)
+            val allowed = listOf(substation, voltageLevel, generators, loads, branches, buses)
             throw UnknownRouteException("Unknown object type $name. Must be one of $allowed")
         }
     }
