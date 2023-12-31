@@ -12,6 +12,7 @@ import com.powsybl.sld.SldParameters
 import io.github.oshai.kotlinlogging.KotlinLogging
 import io.ktor.http.content.*
 import java.io.StringWriter
+import java.nio.ByteBuffer
 
 private val logger = KotlinLogging.logger {}
 
@@ -35,9 +36,11 @@ suspend fun multiPartDataHandler(
 
             is PartData.FileItem -> {
                 val name = part.originalFileName ?: ""
-                val content = part.streamProvider().readBytes()
-                val fileContent = FileContent(name, content)
-                logger.info { "Received file $name with size ${content.size} bytes. Content hash: ${fileContent.contentHash()}" }
+                val fileSize = (part.headers["Content-Length"] ?: "0").toInt()
+                val buffer = ByteBuffer.allocate(fileSize)
+                part.provider().readFully(buffer)
+                val fileContent = FileContent(name, buffer.array())
+                logger.info { "Received file $name with size $fileSize bytes. Content hash: ${fileContent.contentHash()}" }
                 files.add(fileContent)
             }
 
