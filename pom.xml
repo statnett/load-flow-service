@@ -4,7 +4,7 @@
     <artifactId>load-flow-service</artifactId>
     <version>0.0.0</version>
     <properties>
-        <kotlin.version>1.9.21</kotlin.version>
+        <kotlin.version>1.9.22</kotlin.version>
         <ktor.version>3.0.0-eap-852</ktor.version>
         <main.class>com.github.statnett.loadflowservice.AppKt</main.class>
         <kotlin.code.style>official</kotlin.code.style>
@@ -77,7 +77,7 @@
         <dependency>
             <groupId>org.jetbrains.kotlin</groupId>
             <artifactId>kotlin-test-junit5</artifactId>
-            <version>2.0.0-Beta1</version>
+            <version>2.0.0-Beta3</version>
         </dependency>
         <dependency>
             <groupId>io.github.oshai</groupId>
