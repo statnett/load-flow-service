@@ -143,6 +143,6 @@ fun Application.module() {
             val id = call.parameters["id"] ?: ""
             taskManager.respondWithResult(call, id)
         }
-        swaggerUI(path = "openapi", swaggerFile = "openapi/documentation.yaml")
+        swaggerUI(path = "docs", swaggerFile = "openapi/documentation.yaml")
     }
 }
