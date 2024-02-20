@@ -32,6 +32,13 @@ paths:
   /object-names/{object-type}:
     post:
       description: "Extracts names for the given object"
+      parameters:
+        - in: path
+          name: object-type
+          required: true
+          schema:
+            type: string
+          description: Name of the object type for which names should be extracted (substations, voltage-levels, generators, loads, branches, buses)
       requestBody:
         $ref: "#/components/networkFile"
       responses:
@@ -47,6 +54,8 @@ paths:
               type: string
         422:
           $ref: "#/components/missingNetworkFileResponse"
+        500:
+          $ref: "#/components/internalError"
 
 
   /run-load-flow:
