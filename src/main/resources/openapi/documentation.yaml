@@ -7,15 +7,27 @@ servers:
   - url: "http://0.0.0.0:8080"
   - url: "http://devbox:8080"
 paths:
-  /default-load-parameters:
+  /default-values/{parameter-set}:
     get:
-      description: "Get default parameters for the load flow calculation"
+      description: "Get default parameters for the calculations"
+      parameters:
+        - in: path
+          name: parameter-set
+          schema:
+            type: string
+          required: true
+          description: Name of the parameter set (load-params, sensitivity-analysis-params, security-analysis-params)
       responses:
         200:
           description: "Default load parameters as JSON"
           content:
             application/json:
               type: object
+        404:
+          description: "Returned when parameter set is not found. Possible parameter sets is listed"
+          content:
+            plain/text:
+              type: string
 
   /object-names/{object-type}:
     post:
