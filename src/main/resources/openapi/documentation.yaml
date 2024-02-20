@@ -92,6 +92,17 @@ paths:
   /diagram/{type}/{name}:
     post:
       description: "Create a diagram of a named group of components"
+      parameters:
+        - in: path
+          name: type
+          description: Diagram type (generic, substation, voltage-level)
+          schema:
+            type: string
+        - in: path
+          name: name
+          description: Name of the component for which a diagram should be drawn
+          schema:
+            type: string
       requestBody:
         $ref: "#/components/networkFile"
       responses:
