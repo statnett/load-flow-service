@@ -4,8 +4,7 @@ info:
   description: "An API that interacts with Powsybl"
   version: "1.0.0"
 servers:
-  - url: "http://0.0.0.0:8080"
-  - url: "http://devbox:8080"
+  - url: "/"
 paths:
   /default-values/{parameter-set}:
     get:
