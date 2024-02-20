@@ -151,7 +151,7 @@ fun defaultParameterSet(name: String): String {
         }
 
         else -> {
-            val allowed = listOf(loadParams, sensitivityAnalysisParams)
+            val allowed = listOf(loadParams, sensitivityAnalysisParams, securityAnalysisParams)
             throw UnknownRouteException("Unknown parameters set $name. Must be one of $allowed")
         }
     }
