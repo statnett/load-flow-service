@@ -1,4 +1,5 @@
 import com.github.statnett.loadflowservice.*
+import com.github.statnett.loadflowservice.formItemHandlers.FormItemNames.Companion.LOAD_FLOW_PARAMS
 import com.powsybl.ieeecdf.converter.IeeeCdfNetworkFactory
 import io.ktor.client.call.*
 import io.ktor.client.request.*
@@ -93,7 +94,7 @@ class ApplicationTest {
     @Test
     fun `test default load parameters`() =
         testApplication {
-            val response = client.get("/default-values/load-params")
+            val response = client.get("/default-values/$LOAD_FLOW_PARAMS")
             assertEquals(response.status, HttpStatusCode.OK)
 
             val body: String = response.bodyAsText()
