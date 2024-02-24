@@ -37,7 +37,7 @@ data class LineProperties(
     val id: String,
     val isOverloaded: Boolean,
     val terminal1: TerminalProperties,
-    val terminal2: TerminalProperties
+    val terminal2: TerminalProperties,
 )
 
 @Serializable
@@ -51,7 +51,7 @@ data class LoadFlowResultForApi(
     val isOk: Boolean,
     val buses: List<BusProperties>,
     val branches: List<LineProperties>,
-    val report: String
+    val report: String,
 ) : ComputationResult()
 
 fun branchPropertiesFromNetwork(network: Network): List<LineProperties> {
@@ -60,7 +60,7 @@ fun branchPropertiesFromNetwork(network: Network): List<LineProperties> {
             id = line.id,
             isOverloaded = line.isOverloaded,
             terminal1 = TerminalProperties(line.terminal1.p, if (line.terminal1.q.isNaN()) 0.0 else line.terminal1.q),
-            terminal2 = TerminalProperties(line.terminal2.p, if (line.terminal2.q.isNaN()) 0.0 else line.terminal2.q)
+            terminal2 = TerminalProperties(line.terminal2.p, if (line.terminal2.q.isNaN()) 0.0 else line.terminal2.q),
         )
     }.toList()
 }
@@ -69,13 +69,12 @@ fun branchPropertiesFromNetwork(network: Network): List<LineProperties> {
 data class LoadFlowServiceSecurityAnalysisResult(
     @Serializable(with = SecurityAnalysisResultSerializer::class)
     val securityAnalysisResult: SecurityAnalysisResult,
-    val report: String
+    val report: String,
 ) : ComputationResult()
-
 
 @Serializable
 data class LoadFlowServiceSensitivityAnalysisResult(
     @Serializable(with = SensitivityAnalysisResultSerializer::class)
     val sensitivityAnalysisResult: SensitivityAnalysisResult,
-    val report: String
-): ComputationResult()
+    val report: String,
+) : ComputationResult()

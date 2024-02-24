@@ -1,123 +1,123 @@
-openapi: "3.0.3"
+openapi: 3.0.3
 info:
-  title: "Load Flow Service API"
-  description: "An API that interacts with Powsybl"
-  version: "1.0.0"
+  title: Load Flow Service API
+  description: An API that interacts with Powsybl
+  version: 1.0.0
 servers:
-  - url: "/"
+- url: /
 paths:
   /default-values/{parameter-set}:
     get:
-      description: "Get default parameters for the calculations"
+      description: Get default parameters for the calculations
       parameters:
-        - in: path
-          name: parameter-set
-          schema:
-            type: string
-          required: true
-          description: Name of the parameter set (load-flow-params, sensitivity-analysis-params, security-analysis-params)
+      - in: path
+        name: parameter-set
+        schema:
+          type: string
+        required: true
+        description: Name of the parameter set (load-flow-params, sensitivity-analysis-params, security-analysis-params)
       responses:
         200:
-          description: "Default load parameters as JSON"
+          description: Default load parameters as JSON
           content:
             application/json:
               type: object
         404:
-          description: "Returned when parameter set is not found. Possible parameter sets is listed"
+          description: Returned when parameter set is not found. Possible parameter sets is listed
           content:
             plain/text:
               type: string
 
   /object-names/{object-type}:
     post:
-      description: "Extracts names for the given object"
+      description: Extracts names for the given object
       parameters:
-        - in: path
-          name: object-type
-          required: true
-          schema:
-            type: string
-          description: Name of the object type for which names should be extracted (substations, voltage-levels, generators, loads, branches, buses)
+      - in: path
+        name: object-type
+        required: true
+        schema:
+          type: string
+        description: Name of the object type for which names should be extracted (substations, voltage-levels, generators, loads, branches, buses)
       requestBody:
-        $ref: "#/components/networkFile"
+        $ref: '#/components/networkFile'
       responses:
         200:
-          description: "List with names of the specified object type"
+          description: List with names of the specified object type
           content:
             application/json:
               type: object
         404:
-          description: "Object type is not known"
+          description: Object type is not known
           content:
             text/plain:
               type: string
         422:
-          $ref: "#/components/missingNetworkFileResponse"
+          $ref: '#/components/missingNetworkFileResponse'
         500:
-          $ref: "#/components/internalError"
+          $ref: '#/components/internalError'
 
 
   /run-load-flow:
     post:
-      description: "Run load flow calculation"
+      description: Run load flow calculation
       requestBody:
         requestBody:
-          $ref: "#/components/networkFile"
+          $ref: '#/components/networkFile'
           load-flow-params: Solver parameters. See /default-values/load-params
 
 
       responses:
         200:
-          description: "Result of load flow calculation"
+          description: Result of load flow calculation
           content:
             application/json:
               type: object
         422:
-          $ref: "#/components/missingNetworkFileResponse"
+          $ref: '#/components/missingNetworkFileResponse'
         500:
-          $ref: "#/components/internalError"
+          $ref: '#/components/internalError'
 
   /diagram:
     post:
-      description: "Create a network area diagram"
+      description: Create a network area diagram
       requestBody:
-        $ref: "#/components/networkFile"
+        $ref: '#/components/networkFile'
       responses:
         200:
-          $ref: "#/components/svgDiagram"
+          $ref: '#/components/svgDiagram'
         422:
-          $ref: "#/components/missingNetworkFileResponse"
+          $ref: '#/components/missingNetworkFileResponse'
         500:
-          $ref: "#/components/internalError"
+          $ref: '#/components/internalError'
 
   /diagram/{type}/{name}:
     post:
-      description: "Create a diagram of a named group of components"
+      description: Create a diagram of a named group of components
       parameters:
-        - in: path
-          name: type
-          description: Diagram type (generic, substation, voltage-level)
-          schema:
-            type: string
-        - in: path
-          name: name
-          description: Name of the component for which a diagram should be drawn
-          schema:
-            type: string
+      - in: path
+        name: type
+        description: Diagram type (generic, substation, voltage-level)
+        schema:
+          type: string
+      - in: path
+        name: name
+        description: Name of the component for which a diagram should be drawn
+        schema:
+          type: string
       requestBody:
-        $ref: "#/components/networkFile"
+        $ref: '#/components/networkFile'
       responses:
         200:
-          $ref: "#components/svgDiagram"
+          $ref: '#components/svgDiagram'
         400:
-          description: "Unknown type or name"
+          description: Unknown type or name
           content:
             text/plain:
               type: string
         422:
-          $ref: "#/components/missingNetworkFileResponse"
+          $ref: '#/components/missingNetworkFileResponse'
         500:
-          $ref: "#/components/internalError"
+          $ref: '#/components/internalError'
 
 
 components:
@@ -136,7 +136,7 @@ components:
         reactivePower:
           type: double
   networkFile:
-    description: "Form with network data sent as file"
+    description: Form with network data sent as file
     required: true
     content:
       multipart/form-data:
@@ -147,19 +147,19 @@ components:
               type: string
               format: binary
   missingNetworkFileResponse:
-    description: "No network file provided"
+    description: No network file provided
     content:
       text/plain:
         type: string
 
   internalError:
-    description: "An internal error occurred"
+    description: An internal error occurred
     content:
       text/plain:
         type: string
 
   svgDiagram:
-    description: "Generated svg figure"
+    description: Generated svg figure
     content:
       image/svg+xml:
         type: string

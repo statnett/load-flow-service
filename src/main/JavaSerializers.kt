@@ -22,7 +22,10 @@ object SecurityAnalysisResultSerializer : KSerializer<SecurityAnalysisResult> {
     override val descriptor: SerialDescriptor =
         PrimitiveSerialDescriptor("security-analysis-report", PrimitiveKind.STRING)
 
-    override fun serialize(encoder: Encoder, value: SecurityAnalysisResult) {
+    override fun serialize(
+        encoder: Encoder,
+        value: SecurityAnalysisResult,
+    ) {
         val string = mapper.writeValueAsString(value)
         encoder.encodeString(string)
     }
@@ -33,16 +36,20 @@ object SecurityAnalysisResultSerializer : KSerializer<SecurityAnalysisResult> {
     }
 }
 
-object SensitivityAnalysisResultSerializer: KSerializer<SensitivityAnalysisResult> {
+object SensitivityAnalysisResultSerializer : KSerializer<SensitivityAnalysisResult> {
     private val mapper = ObjectMapper()
 
     init {
         mapper.registerModule(SensitivityJsonModule())
     }
 
-    override val descriptor: SerialDescriptor = PrimitiveSerialDescriptor("sensitivity-analysis-result", PrimitiveKind.STRING)
+    override val descriptor: SerialDescriptor =
+        PrimitiveSerialDescriptor("sensitivity-analysis-result", PrimitiveKind.STRING)
 
-    override fun serialize(encoder: Encoder, value: SensitivityAnalysisResult) {
+    override fun serialize(
+        encoder: Encoder,
+        value: SensitivityAnalysisResult,
+    ) {
         val string = mapper.writeValueAsString(value)
         encoder.encodeString(string)
     }

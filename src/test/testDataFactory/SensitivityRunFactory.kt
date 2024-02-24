@@ -1,8 +1,8 @@
 package testDataFactory
 
 import com.github.statnett.loadflowservice.formItemHandlers.AutoSerializableSensitivityFactor
-import io.ktor.client.request.forms.*
-import io.ktor.http.content.*
+import io.ktor.client.request.forms.formData
+import io.ktor.http.content.PartData
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
@@ -12,13 +12,13 @@ data class Contingencies(
     val type: String,
     val version: String,
     val name: String,
-    val contingencies: List<Contingency>
+    val contingencies: List<Contingency>,
 )
 
 @Serializable
 data class Contingency(
     val id: String,
-    val elements: List<ContingencyElement>
+    val elements: List<ContingencyElement>,
 )
 
 @Serializable
@@ -36,10 +36,11 @@ fun ieee14BusContingencies(): Contingencies {
         type = "default",
         version = "1.0",
         name = "list",
-        contingencies = listOf(
-            Contingency(id = "generatorContingency", listOf(generator)),
-            Contingency(id = "branchContingency", listOf(br1, br2))
-        )
+        contingencies =
+            listOf(
+                Contingency(id = "generatorContingency", listOf(generator)),
+                Contingency(id = "branchContingency", listOf(br1, br2)),
+            ),
     )
 }
 
@@ -51,8 +52,8 @@ fun ieee14SensitivityFactor(): List<AutoSerializableSensitivityFactor> {
             variableType = "INJECTION_ACTIVE_POWER",
             variableId = "B2-G",
             variableSet = false,
-            contingencyContextType = "ALL"
-        )
+            contingencyContextType = "ALL",
+        ),
     )
 }
 
@@ -67,7 +68,7 @@ fun ieee14SensitivityParams(): String {
 data class SensitivityAnalysisConfig(
     val withContingencies: Boolean,
     val withLoadParameters: Boolean,
-    val withSensitivityParameters: Boolean
+    val withSensitivityParameters: Boolean,
 )
 
 fun allSensitivityAnalysisConfigs(): List<SensitivityAnalysisConfig> {
@@ -85,7 +86,7 @@ fun loadParams(): List<PartData> {
     return formData {
         append(
             "load-parameters",
-            ieee14SensitivityLoadParams()
+            ieee14SensitivityLoadParams(),
         )
     }
 }
@@ -94,7 +95,7 @@ fun sensFactors(): List<PartData> {
     return formData {
         append(
             "sensitivity-factors",
-            Json.encodeToString(ieee14SensitivityFactor())
+            Json.encodeToString(ieee14SensitivityFactor()),
         )
     }
 }
@@ -103,7 +104,7 @@ fun contingencies(): List<PartData> {
     return formData {
         append(
             "contingencies",
-            Json.encodeToString(ieee14BusContingencies())
+            Json.encodeToString(ieee14BusContingencies()),
         )
     }
 }
@@ -112,7 +113,7 @@ fun sensParams(): List<PartData> {
     return formData {
         append(
             "sensitivity-analysis-parameters",
-            ieee14SensitivityParams()
+            ieee14SensitivityParams(),
         )
     }
 }
@@ -122,7 +123,7 @@ data class SensitivityAnalysisFormDataContainer(
     val loadParams: List<PartData> = loadParams(),
     val sensFactors: List<PartData> = sensFactors(),
     val contingencies: List<PartData> = contingencies(),
-    val sensParams: List<PartData> = sensParams()
+    val sensParams: List<PartData> = sensParams(),
 ) {
     fun formData(config: SensitivityAnalysisConfig): List<PartData> {
         val parts: MutableList<PartData> = arrayListOf()

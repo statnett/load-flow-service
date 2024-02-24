@@ -4,7 +4,7 @@ import com.github.statnett.loadflowservice.formItemHandlers.FormItemNames.Compan
 import com.powsybl.loadflow.LoadFlowParameters
 import com.powsybl.loadflow.json.JsonLoadFlowParameters
 import io.github.oshai.kotlinlogging.KotlinLogging
-import io.ktor.http.content.*
+import io.ktor.http.content.PartData
 
 private val logger = KotlinLogging.logger {}
 

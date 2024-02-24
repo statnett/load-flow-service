@@ -1,13 +1,16 @@
 package com.github.statnett.loadflowservice
 
 import com.powsybl.commons.PowsyblException
-import com.powsybl.commons.json.JsonUtil
 import com.powsybl.commons.reporter.Reporter
 import com.powsybl.commons.reporter.ReporterModel
 import com.powsybl.computation.local.LocalComputationManager
 import com.powsybl.contingency.ContingenciesProvider
 import com.powsybl.contingency.contingency.list.ContingencyList
-import com.powsybl.iidm.network.*
+import com.powsybl.iidm.network.ImportConfig
+import com.powsybl.iidm.network.Importer
+import com.powsybl.iidm.network.ImportersServiceLoader
+import com.powsybl.iidm.network.Network
+import com.powsybl.iidm.network.NetworkFactory
 import com.powsybl.loadflow.LoadFlow
 import com.powsybl.loadflow.LoadFlowParameters
 import com.powsybl.loadflow.json.JsonLoadFlowParameters
@@ -19,15 +22,15 @@ import com.powsybl.security.detectors.DefaultLimitViolationDetector
 import com.powsybl.security.interceptors.SecurityAnalysisInterceptor
 import com.powsybl.security.monitor.StateMonitor
 import com.powsybl.security.strategy.OperatorStrategy
-import com.powsybl.sensitivity.*
+import com.powsybl.sensitivity.SensitivityAnalysis
+import com.powsybl.sensitivity.SensitivityAnalysisParameters
+import com.powsybl.sensitivity.SensitivityFactor
+import com.powsybl.sensitivity.SensitivityVariableSet
 import io.github.oshai.kotlinlogging.KotlinLogging
-import kotlinx.serialization.Serializable
 import java.io.ByteArrayOutputStream
 import java.io.StringWriter
 
-
 private val logger = KotlinLogging.logger {}
-
 
 fun warnOnFewAvailableImporters() {
     val numLoaders = ImportersServiceLoader().loadImporters().size
@@ -98,46 +101,46 @@ fun solve(
     parameters: LoadFlowParameters,
 ): LoadFlowResultForApi {
     val reporter = loadFlowReporter()
-    val result = LoadFlow.run(
-        network,
-        network.variantManager.workingVariantId,
-        LocalComputationManager.getDefault(),
-        parameters,
-        reporter
-    )
+    val result =
+        LoadFlow.run(
+            network,
+            network.variantManager.workingVariantId,
+            LocalComputationManager.getDefault(),
+            parameters,
+            reporter,
+        )
     return LoadFlowResultForApi(
         isOk = result.isOk,
         buses = busPropertiesFromNetwork(network),
         branches = branchPropertiesFromNetwork(network),
-        report = reporterToString(reporter)
+        report = reporterToString(reporter),
     )
 }
-
 
 fun runSensitivityAnalysis(
     network: Network,
     factors: List<SensitivityFactor>,
     params: SensitivityAnalysisParameters,
-    contingenciesList: ContingencyList
+    contingenciesList: ContingencyList,
 ): LoadFlowServiceSensitivityAnalysisResult {
     val reporter = ReporterModel("sensitivity", "")
     val variableSets: List<SensitivityVariableSet> = listOf()
     val contingencies = contingenciesList.getContingencies(network)
 
-
-
-    val result = SensitivityAnalysis.run(
-        network,
-        network.variantManager.workingVariantId,
-        factors,
-        contingencies,
-        variableSets,
-        params,
-        LocalComputationManager.getDefault(),
-        reporter
-    )
+    val result =
+        SensitivityAnalysis.run(
+            network,
+            network.variantManager.workingVariantId,
+            factors,
+            contingencies,
+            variableSets,
+            params,
+            LocalComputationManager.getDefault(),
+            reporter,
+        )
     return LoadFlowServiceSensitivityAnalysisResult(
-        result, reporterToString(reporter)
+        result,
+        reporterToString(reporter),
     )
 }
 
@@ -148,22 +151,23 @@ fun runSecurityAnalysis(
     intersceptors: List<SecurityAnalysisInterceptor>,
     operatorStrategies: List<OperatorStrategy>,
     actions: List<Action>,
-    monitors: List<StateMonitor>
+    monitors: List<StateMonitor>,
 ): LoadFlowServiceSecurityAnalysisResult {
     val reporter = ReporterModel("security", "")
-    val securityReport = SecurityAnalysis.run(
-        network,
-        network.variantManager.workingVariantId,
-        contingencies,
-        params,
-        LocalComputationManager.getDefault(),
-        LimitViolationFilter.load(),
-        DefaultLimitViolationDetector(),
-        intersceptors,
-        operatorStrategies,
-        actions,
-        monitors,
-        reporter
-    )
+    val securityReport =
+        SecurityAnalysis.run(
+            network,
+            network.variantManager.workingVariantId,
+            contingencies,
+            params,
+            LocalComputationManager.getDefault(),
+            LimitViolationFilter.load(),
+            DefaultLimitViolationDetector(),
+            intersceptors,
+            operatorStrategies,
+            actions,
+            monitors,
+            reporter,
+        )
     return LoadFlowServiceSecurityAnalysisResult(securityReport.result, reporterToString(reporter))
 }

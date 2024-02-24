@@ -11,22 +11,22 @@ import com.powsybl.sensitivity.json.SensitivityJsonModule
 import com.powsybl.sld.SingleLineDiagram
 import com.powsybl.sld.SldParameters
 import io.github.oshai.kotlinlogging.KotlinLogging
-import io.ktor.http.content.*
+import io.ktor.http.content.MultiPartData
+import io.ktor.http.content.PartData
+import io.ktor.http.content.forEachPart
 import java.io.StringWriter
 import java.nio.ByteBuffer
 
 private val logger = KotlinLogging.logger {}
 
-fun busesFromRequest(
-    content: FileContent
-): List<BusProperties> {
+fun busesFromRequest(content: FileContent): List<BusProperties> {
     val network = networkFromFileContent(content)
     return busPropertiesFromNetwork(network)
 }
 
 suspend fun multiPartDataHandler(
     multiPartData: MultiPartData,
-    formItemHandler: (part: PartData.FormItem) -> Unit = {}
+    formItemHandler: (part: PartData.FormItem) -> Unit = {},
 ): List<FileContent> {
     val files = mutableListOf<FileContent>()
     multiPartData.forEachPart { part ->
@@ -41,7 +41,10 @@ suspend fun multiPartDataHandler(
                 val buffer = ByteBuffer.allocate(fileSize)
                 part.provider().readFully(buffer)
                 val fileContent = FileContent(name, buffer.array())
-                logger.info { "Received file $name with size $fileSize bytes. Content hash: ${fileContent.contentHash()}" }
+                logger.info {
+                    "Received file $name with size $fileSize bytes. " +
+                        "Content hash: ${fileContent.contentHash()}"
+                }
                 files.add(fileContent)
             }
 
@@ -65,10 +68,13 @@ fun getDiagramType(value: String): DiagramType {
     } catch (e: NoSuchElementException) {
         DiagramType.Generic
     }
-
 }
 
-fun singleLineDiagram(type: DiagramType, name: String, network: Network): String {
+fun singleLineDiagram(
+    type: DiagramType,
+    name: String,
+    network: Network,
+): String {
     val svgWriter = StringWriter()
 
     // Declare a writer for metadata
@@ -157,7 +163,10 @@ fun defaultParameterSet(name: String): String {
     }
 }
 
-fun modelObjectNames(name: String, network: Network): List<String> {
+fun modelObjectNames(
+    name: String,
+    network: Network,
+): List<String> {
     val substation = "substations"
     val voltageLevel = "voltage-levels"
     val generators = "generators"

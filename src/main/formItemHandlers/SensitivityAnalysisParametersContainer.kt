@@ -3,7 +3,7 @@ package com.github.statnett.loadflowservice.formItemHandlers
 import com.powsybl.sensitivity.SensitivityAnalysisParameters
 import com.powsybl.sensitivity.json.JsonSensitivityAnalysisParameters
 import io.github.oshai.kotlinlogging.KotlinLogging
-import io.ktor.http.content.*
+import io.ktor.http.content.PartData
 
 private val logger = KotlinLogging.logger {}
 

@@ -1,11 +1,14 @@
 package testUtils
 
-import io.ktor.client.statement.*
-import io.ktor.http.*
+import io.ktor.client.statement.HttpResponse
+import io.ktor.http.HttpStatusCode
 import kotlinx.coroutines.delay
 
-
-suspend fun retryOnError(delayMs: Long, maxAttempts: Int, task: suspend () -> HttpResponse): HttpResponse {
+suspend fun retryOnError(
+    delayMs: Long,
+    maxAttempts: Int,
+    task: suspend () -> HttpResponse,
+): HttpResponse {
     for (i in 0..maxAttempts) {
         val response = task()
 

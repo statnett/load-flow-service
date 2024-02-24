@@ -1,13 +1,14 @@
 package testDataFactory
 
 import com.powsybl.ieeecdf.converter.IeeeCdfNetworkFactory
-import io.ktor.client.request.forms.*
-import io.ktor.http.*
-import io.ktor.http.content.*
+import io.ktor.client.request.forms.formData
+import io.ktor.http.Headers
+import io.ktor.http.HttpHeaders
+import io.ktor.http.content.PartData
 import java.io.File
 import java.io.FileOutputStream
 import java.nio.file.Paths
-import java.util.*
+import java.util.Properties
 import java.util.zip.ZipEntry
 import java.util.zip.ZipOutputStream
 
@@ -19,19 +20,21 @@ fun ieeeCdfNetwork14CgmesFile(): File {
 
     // Read the produced files in EQ/SSH/SV/TP and create one zip archive
     val withOutExtension = file.path.toString().replace(".zip", "")
-    val cimXmlFiles = listOf("EQ", "TP", "SV", "SSH").map { profile -> "${withOutExtension}_${profile}.xml" }
+    val cimXmlFiles = listOf("EQ", "TP", "SV", "SSH").map { profile -> "${withOutExtension}_$profile.xml" }
 
     val fileOutputStream = FileOutputStream(file)
     val zipOutputStream = ZipOutputStream(fileOutputStream)
-
 
     cimXmlFiles.forEach { cimXmlFile -> addToArchiveAndDeleteFile(cimXmlFile, zipOutputStream) }
     zipOutputStream.close()
     return file
 }
 
-fun addToArchiveAndDeleteFile(filename: String, outStream: ZipOutputStream) {
-    val pattern = Regex(pattern = """([^/]+$)""")  // Extract everything after the last slash
+fun addToArchiveAndDeleteFile(
+    filename: String,
+    outStream: ZipOutputStream,
+) {
+    val pattern = Regex(pattern = """([^/]+$)""") // Extract everything after the last slash
     val match = pattern.find(filename)!!
     val baseName = match.groupValues[1]
     val zipEntry = ZipEntry(baseName)
@@ -50,7 +53,7 @@ fun formDataMinimalNetworkRawx(): List<PartData> {
             minimalRawx(),
             Headers.build {
                 append(HttpHeaders.ContentDisposition, "filename=network.rawx")
-            }
+            },
         )
     }
 }
@@ -65,7 +68,8 @@ fun ieeeCdfNetwork14File(): File {
 }
 
 fun minimalRawx(): ByteArray {
-    return ("{\"network\":{\"caseid\":{" +
+    return (
+        "{\"network\":{\"caseid\":{" +
             "\"fields\":[\"ic\",\"sbase\",\"rev\",\"xfrrat\",\"nxfrat\",\"basfrq\",\"title1\"]," +
             "\"data\":[0,100.00,35,0,0,60.00,\"PSS(R)EMinimumRAWXCase\"]}," +
             "\"bus\":{\"fields\":[\"ibus\",\"name\",\"baskv\",\"ide\"]," +
@@ -75,7 +79,8 @@ fun minimalRawx(): ByteArray {
             "\"generator\":{\"fields\":[\"ibus\",\"machid\",\"pg\",\"qg\"]," +
             "\"data\":[[1,\"1\",\"40.35\",\"10.87\"]]}," +
             "\"acline\":{\"fields\":[\"ibus\",\"jbus\",\"ckt\",\"rpu\",\"xpu\",\"bpu\"]," +
-            "\"data\":[[1,2,\"1\",0.01938,0.05917,0.05280]]}}}").toByteArray()
+            "\"data\":[[1,2,\"1\",0.01938,0.05917,0.05280]]}}}"
+    ).toByteArray()
 }
 
 fun formDataWithEmptyNetwork(): List<PartData> {
@@ -85,7 +90,7 @@ fun formDataWithEmptyNetwork(): List<PartData> {
             byteArrayOf(),
             Headers.build {
                 append(HttpHeaders.ContentDisposition, "filename=emptyFile.xiidm")
-            }
+            },
         )
     }
 }
@@ -104,14 +109,16 @@ fun formDataFromFile(file: File): List<PartData> {
 
 fun basicContingencyJson(): String {
     // Contains names and branches from the create9() case in Powsybl's NetworkFactory
-    return ("{\"type\":\"default\",\"version\":\"1.0\",\"name\":\"list\"," +
+    return (
+        "{\"type\":\"default\",\"version\":\"1.0\",\"name\":\"list\"," +
             "\"contingencies\":[{\"id\":\"contingency\",\"elements\":[{\"id\":\"L7-8-0\",\"type\":\"BRANCH\"}," +
             "{\"id\":\"L9-8-0\",\"type\":\"BRANCH\"}]}," +
-            "{\"id\":\"contingency2\",\"elements\":[{\"id\":\"B1-G\",\"type\":\"GENERATOR\"}]}]}")
+            "{\"id\":\"contingency2\",\"elements\":[{\"id\":\"B1-G\",\"type\":\"GENERATOR\"}]}]}"
+    )
 }
 
 fun sensitivityFactorList(): String {
     return "[{\"functionType\":\"BRANCH_ACTIVE_POWER_2\",\"functionId\":\"l\"," +
-            "\"variableType\":\"INJECTION_ACTIVE_POWER\",\"variableId\":\"g\",\"variableSet\":false," +
-            "\"contingencyContextType\":\"ALL\"}]"
+        "\"variableType\":\"INJECTION_ACTIVE_POWER\",\"variableId\":\"g\",\"variableSet\":false," +
+        "\"contingencyContextType\":\"ALL\"}]"
 }

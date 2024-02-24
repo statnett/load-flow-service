@@ -2,9 +2,12 @@ import com.github.statnett.loadflowservice.FullBufferException
 import com.github.statnett.loadflowservice.Task
 import com.github.statnett.loadflowservice.TaskManager
 import com.github.statnett.loadflowservice.TaskStatus
-import junit.framework.TestCase.*
 import kotlin.test.Test
+import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
+import kotlin.test.assertFalse
+import kotlin.test.assertNull
+import kotlin.test.assertTrue
 
 class TaskManagerTest {
     @Test
@@ -38,7 +41,7 @@ class TaskManagerTest {
     fun `test tasks not inserted when max number of tasks are running`() {
         val maxRunning = 5
         val tm = TaskManager(maxRunning)
-        repeat (maxRunning) { tm.register(runningTask()) }
+        repeat(maxRunning) { tm.register(runningTask()) }
         assertEquals(maxRunning, tm.numRunning())
         assertEquals(maxRunning, tm.size())
 
