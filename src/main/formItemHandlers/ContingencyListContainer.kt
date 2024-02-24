@@ -7,10 +7,9 @@ import com.powsybl.contingency.contingency.list.DefaultContingencyList
 import com.powsybl.contingency.json.JsonContingencyListLoader
 import com.powsybl.iidm.network.Network
 import io.github.oshai.kotlinlogging.KotlinLogging
-import io.ktor.http.content.*
+import io.ktor.http.content.PartData
 
 private val logger = KotlinLogging.logger {}
-
 
 class ContingencyListContainer : AutoVersionableJsonParser(), FormItemLoadable, ContingenciesProvider {
     var contingencies: ContingencyList = DefaultContingencyList()

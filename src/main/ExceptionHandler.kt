@@ -1,11 +1,14 @@
 package com.github.statnett.loadflowservice
 
-import io.ktor.http.*
-import io.ktor.server.application.*
-import io.ktor.server.response.*
+import io.ktor.http.HttpStatusCode
+import io.ktor.server.application.ApplicationCall
+import io.ktor.server.response.respondText
 
 class ExceptionHandler {
-    suspend fun handle(call: ApplicationCall, cause: Throwable) {
+    suspend fun handle(
+        call: ApplicationCall,
+        cause: Throwable,
+    ) {
         when (cause) {
             is NoFileProvidedException -> {
                 call.respondText(
@@ -17,28 +20,28 @@ class ExceptionHandler {
             is UnknownRouteException -> {
                 call.respondText(
                     "$cause",
-                    status = HttpStatusCode.NotFound
+                    status = HttpStatusCode.NotFound,
                 )
             }
 
             is TaskDoesNotExistException -> {
                 call.respondText(
                     "$cause",
-                    status = HttpStatusCode.NotFound
+                    status = HttpStatusCode.NotFound,
                 )
             }
 
             is FullBufferException -> {
                 call.respondText(
                     "Service is currently unavailable because too many tasks are running.",
-                    status = HttpStatusCode.ServiceUnavailable
+                    status = HttpStatusCode.ServiceUnavailable,
                 )
             }
 
             else -> {
                 call.respondText(
                     "500: $cause. Stack trace: ${cause.stackTraceToString()}",
-                    status = HttpStatusCode.InternalServerError
+                    status = HttpStatusCode.InternalServerError,
                 )
             }
         }

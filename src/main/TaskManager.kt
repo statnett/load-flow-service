@@ -1,21 +1,25 @@
 package com.github.statnett.loadflowservice
 
 import io.github.oshai.kotlinlogging.KotlinLogging
-import io.ktor.http.*
-import io.ktor.server.application.*
-import io.ktor.server.response.*
+import io.ktor.http.ContentType
+import io.ktor.http.HttpStatusCode
+import io.ktor.server.application.ApplicationCall
+import io.ktor.server.response.respondText
 import kotlinx.coroutines.delay
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
-import java.util.*
+import java.util.UUID
 import kotlin.time.DurationUnit
 import kotlin.time.toDuration
 
 private val logger = KotlinLogging.logger { }
 
 enum class TaskStatus {
-    CREATED, RUNNING, FINISHED, FAILED
+    CREATED,
+    RUNNING,
+    FINISHED,
+    FAILED,
 }
 
 class Task {
@@ -70,6 +74,7 @@ class TaskQueue {
 }
 
 class TaskDoesNotExistException(message: String) : Exception(message)
+
 class FullBufferException(message: String) : Exception(message)
 
 @Serializable
@@ -83,7 +88,7 @@ class TaskManager(private val maxRunningTasks: Int = 100, private val retention:
         val message = if (task.exception != null) "${task.exception}" else ""
         return TaskStatusResponse(
             task.status.name,
-            message
+            message,
         )
     }
 
@@ -110,8 +115,10 @@ class TaskManager(private val maxRunningTasks: Int = 100, private val retention:
         queue.register(task)
     }
 
-
-    suspend fun respondWithResult(call: ApplicationCall, id: String) {
+    suspend fun respondWithResult(
+        call: ApplicationCall,
+        id: String,
+    ) {
         if (status(id).status != TaskStatus.FINISHED.name) {
             call.respondText("Task not finished", status = HttpStatusCode.NotFound)
             return
@@ -135,5 +142,4 @@ class TaskManager(private val maxRunningTasks: Int = 100, private val retention:
         queue.remove(id)
         logger.info { "Deleted task $id" }
     }
-
 }

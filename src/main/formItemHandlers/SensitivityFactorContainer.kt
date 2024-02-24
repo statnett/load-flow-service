@@ -6,7 +6,7 @@ import com.powsybl.sensitivity.SensitivityFactor
 import com.powsybl.sensitivity.SensitivityFunctionType
 import com.powsybl.sensitivity.SensitivityVariableType
 import io.github.oshai.kotlinlogging.KotlinLogging
-import io.ktor.http.content.*
+import io.ktor.http.content.PartData
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 
@@ -19,16 +19,18 @@ class AutoSerializableSensitivityFactor(
     private val variableType: String,
     private val variableId: String,
     private val variableSet: Boolean,
-    private val contingencyContextType: String
+    private val contingencyContextType: String,
 ) {
     fun asSensitivityFactor(): SensitivityFactor {
         val ctgType = ContingencyContextType.valueOf(contingencyContextType)
         return SensitivityFactor(
-            SensitivityFunctionType.valueOf(functionType), functionId,
-            SensitivityVariableType.valueOf(variableType), variableId, variableSet,
-
+            SensitivityFunctionType.valueOf(functionType),
+            functionId,
+            SensitivityVariableType.valueOf(variableType),
+            variableId,
+            variableSet,
             // TODO: Check how contingencyId is passed when type is SPECIAL
-            ContingencyContext.create(null, ctgType)
+            ContingencyContext.create(null, ctgType),
         )
     }
 }
@@ -39,9 +41,10 @@ class SensitivityFactorContainer : FormItemLoadable {
     var factors: List<SensitivityFactor> = listOf()
 
     fun update(jsonString: String) {
-        this.factors = Json.decodeFromString<AutoSerializableSensitivityFactorList>(jsonString).map { item ->
-            item.asSensitivityFactor()
-        }
+        this.factors =
+            Json.decodeFromString<AutoSerializableSensitivityFactorList>(jsonString).map { item ->
+                item.asSensitivityFactor()
+            }
     }
 
     override fun formItemHandler(part: PartData.FormItem) {

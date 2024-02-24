@@ -19,12 +19,15 @@ fun resultUrl(id: String): String {
 data class TaskInfo(
     val statusUrl: String,
     val resultUrl: String,
-    val id: String
+    val id: String,
 )
 
 private val logger = KotlinLogging.logger { }
 
-fun createTask(tm: TaskManager, calculate: () -> ComputationResult): TaskInfo {
+fun createTask(
+    tm: TaskManager,
+    calculate: () -> ComputationResult,
+): TaskInfo {
     val task = Task()
     tm.register(task)
     CoroutineScope(Dispatchers.Default).launch {
@@ -45,6 +48,6 @@ fun createTask(tm: TaskManager, calculate: () -> ComputationResult): TaskInfo {
     return TaskInfo(
         statusUrl = statusUrl(task.id),
         resultUrl = resultUrl(task.id),
-        id = task.id
+        id = task.id,
     )
 }

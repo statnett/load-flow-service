@@ -1,21 +1,32 @@
 package com.github.statnett.loadflowservice
 
-import com.github.statnett.loadflowservice.formItemHandlers.*
+import com.github.statnett.loadflowservice.formItemHandlers.ContingencyListContainer
+import com.github.statnett.loadflowservice.formItemHandlers.LoadParameterContainer
+import com.github.statnett.loadflowservice.formItemHandlers.MultiFormItemLoaders
+import com.github.statnett.loadflowservice.formItemHandlers.SecurityAnalysisParametersContainer
+import com.github.statnett.loadflowservice.formItemHandlers.SensitivityAnalysisParametersContainer
+import com.github.statnett.loadflowservice.formItemHandlers.SensitivityFactorContainer
 import com.powsybl.security.action.Action
 import com.powsybl.security.interceptors.SecurityAnalysisInterceptor
 import com.powsybl.security.monitor.StateMonitor
 import com.powsybl.security.strategy.OperatorStrategy
-import io.ktor.http.*
-import io.ktor.serialization.kotlinx.json.*
-import io.ktor.server.application.*
-import io.ktor.server.plugins.callloging.*
-import io.ktor.server.plugins.contentnegotiation.*
-import io.ktor.server.plugins.cors.routing.*
-import io.ktor.server.plugins.statuspages.*
-import io.ktor.server.plugins.swagger.*
-import io.ktor.server.request.*
-import io.ktor.server.response.*
-import io.ktor.server.routing.*
+import io.ktor.http.ContentType
+import io.ktor.http.HttpHeaders
+import io.ktor.http.HttpStatusCode
+import io.ktor.serialization.kotlinx.json.json
+import io.ktor.server.application.Application
+import io.ktor.server.application.install
+import io.ktor.server.plugins.callloging.CallLogging
+import io.ktor.server.plugins.contentnegotiation.ContentNegotiation
+import io.ktor.server.plugins.cors.routing.CORS
+import io.ktor.server.plugins.statuspages.StatusPages
+import io.ktor.server.plugins.swagger.swaggerUI
+import io.ktor.server.request.receiveMultipart
+import io.ktor.server.response.respond
+import io.ktor.server.response.respondText
+import io.ktor.server.routing.get
+import io.ktor.server.routing.post
+import io.ktor.server.routing.routing
 
 fun main(args: Array<String>): Unit = io.ktor.server.netty.EngineMain.main(args)
 
@@ -71,7 +82,6 @@ fun Application.module() {
             val network = networkFromFirstFile(files)
             val diagram = singleLineDiagram(diagramType, name, network)
             call.respondText(diagram, ContentType.Image.SVG, HttpStatusCode.OK)
-
         }
 
         post("/diagram") {
@@ -92,14 +102,15 @@ fun Application.module() {
 
             sensParamCnt.parameters.setLoadFlowParameters(loadParamCnt.parameters)
             val network = networkFromFirstFile(files)
-            val result = createTask(taskManager) {
-                runSensitivityAnalysis(
-                    network,
-                    sensFactorCnt.factors,
-                    sensParamCnt.parameters,
-                    contingencyCnt.contingencies
-                )
-            }
+            val result =
+                createTask(taskManager) {
+                    runSensitivityAnalysis(
+                        network,
+                        sensFactorCnt.factors,
+                        sensParamCnt.parameters,
+                        contingencyCnt.contingencies,
+                    )
+                }
             call.respond(result)
         }
 
@@ -120,17 +131,18 @@ fun Application.module() {
             val actions: List<Action> = listOf()
             val monitors: List<StateMonitor> = listOf()
 
-            val result = createTask(taskManager) {
-                runSecurityAnalysis(
-                    network,
-                    securityParamsCnt.parameters,
-                    contingencyCnt,
-                    intersceptors,
-                    operatorStrategies,
-                    actions,
-                    monitors
-                )
-            }
+            val result =
+                createTask(taskManager) {
+                    runSecurityAnalysis(
+                        network,
+                        securityParamsCnt.parameters,
+                        contingencyCnt,
+                        intersceptors,
+                        operatorStrategies,
+                        actions,
+                        monitors,
+                    )
+                }
             call.respond(result)
         }
 

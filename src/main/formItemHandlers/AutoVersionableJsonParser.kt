@@ -1,6 +1,6 @@
 package com.github.statnett.loadflowservice.formItemHandlers
 
-import io.ktor.http.content.*
+import io.ktor.http.content.PartData
 
 abstract class AutoVersionableJsonParser {
     internal fun addVersionToJsonString(jsonString: String): String {
@@ -16,5 +16,6 @@ abstract class AutoVersionableJsonParser {
     }
 
     abstract fun currentVersion(): String
+
     abstract fun formItemHandler(part: PartData.FormItem)
 }

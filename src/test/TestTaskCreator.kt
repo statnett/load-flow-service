@@ -16,9 +16,10 @@ class TestTaskCreator {
         val tm = TaskManager()
         val network = IeeeCdfNetworkFactory.create14()
         val params = LoadFlowParameters()
-        val taskInfo = createTask(tm) {
-            solve(network, params)
-        }
+        val taskInfo =
+            createTask(tm) {
+                solve(network, params)
+            }
 
         // Sleep a little bit so the task can finish
         TimeUnit.SECONDS.sleep(1L)
@@ -35,9 +36,10 @@ class TestTaskCreator {
     fun `test scheduled for deletion when exception occur`() {
         val tm = TaskManager()
         val msg = "Something unexpected happened!"
-        val taskInfo = createTask(tm) {
-            throw RuntimeException(msg)
-        }
+        val taskInfo =
+            createTask(tm) {
+                throw RuntimeException(msg)
+            }
 
         // Small sleep to be absolutely sure that the thread was finished
         TimeUnit.MILLISECONDS.sleep(50L)

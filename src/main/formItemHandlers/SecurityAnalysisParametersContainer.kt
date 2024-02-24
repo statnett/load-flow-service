@@ -3,7 +3,7 @@ package com.github.statnett.loadflowservice.formItemHandlers
 import com.powsybl.security.SecurityAnalysisParameters
 import com.powsybl.security.json.JsonSecurityAnalysisParameters
 import io.github.oshai.kotlinlogging.KotlinLogging
-import io.ktor.http.content.*
+import io.ktor.http.content.PartData
 
 private val logger = KotlinLogging.logger {}
 
