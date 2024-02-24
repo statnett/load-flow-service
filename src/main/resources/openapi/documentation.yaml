@@ -15,7 +15,7 @@ paths:
           schema:
             type: string
           required: true
-          description: Name of the parameter set (load-params, sensitivity-analysis-params, security-analysis-params)
+          description: Name of the parameter set (load-flow-params, sensitivity-analysis-params, security-analysis-params)
       responses:
         200:
           description: "Default load parameters as JSON"
@@ -63,6 +63,8 @@ paths:
       requestBody:
         requestBody:
           $ref: "#/components/networkFile"
+          load-flow-params: Solver parameters. See /default-values/load-params
+
 
       responses:
         200:

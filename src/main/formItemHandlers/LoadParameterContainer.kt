@@ -1,5 +1,6 @@
 package com.github.statnett.loadflowservice.formItemHandlers
 
+import com.github.statnett.loadflowservice.formItemHandlers.FormItemNames.Companion.LOAD_FLOW_PARAMS
 import com.powsybl.loadflow.LoadFlowParameters
 import com.powsybl.loadflow.json.JsonLoadFlowParameters
 import io.github.oshai.kotlinlogging.KotlinLogging
@@ -26,7 +27,7 @@ class LoadParameterContainer : AutoVersionableJsonParser(), FormItemLoadable {
 
     override fun formItemHandler(part: PartData.FormItem) {
         val name = part.name ?: ""
-        if (name == "load-flow-parameters") {
+        if (name == LOAD_FLOW_PARAMS) {
             this.update(part.value)
             logger.info { "Received load flow parameters: ${part.value}" }
         }
