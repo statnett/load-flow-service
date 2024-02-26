@@ -169,7 +169,7 @@ class ApplicationTest {
             val formData = formDataFromFile(ieeeCdfNetwork14File())
             val loadParams =
                 formData {
-                    append("load-flow-parameters", "{\"dc\": true}")
+                    append(LOAD_FLOW_PARAMS, "{\"dc\": true}")
                 }
 
             val response =
@@ -202,7 +202,7 @@ class ApplicationTest {
             val formData = formDataFromFile(ieeeCdfNetwork14File())
             val loadParams =
                 formData {
-                    append("load-flow-parameters", "{\"version\":\"1.0\",\"dc\": true}")
+                    append(LOAD_FLOW_PARAMS, "{\"version\":\"1.0\",\"dc\": true}")
                 }
 
             val response =

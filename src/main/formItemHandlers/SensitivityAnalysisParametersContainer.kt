@@ -1,5 +1,6 @@
 package com.github.statnett.loadflowservice.formItemHandlers
 
+import com.github.statnett.loadflowservice.formItemHandlers.FormItemNames.Companion.SENSITIVITY_ANALYSIS_PARAMS
 import com.powsybl.sensitivity.SensitivityAnalysisParameters
 import com.powsybl.sensitivity.json.JsonSensitivityAnalysisParameters
 import io.github.oshai.kotlinlogging.KotlinLogging
@@ -21,7 +22,7 @@ class SensitivityAnalysisParametersContainer : AutoVersionableJsonParser(), Form
 
     override fun formItemHandler(part: PartData.FormItem) {
         val name = part.name ?: ""
-        if (name == "sensitivity-analysis-parameters") {
+        if (name == SENSITIVITY_ANALYSIS_PARAMS) {
             this.update(part.value)
             logger.info { "Received load flow parameters: ${part.value}" }
         }
