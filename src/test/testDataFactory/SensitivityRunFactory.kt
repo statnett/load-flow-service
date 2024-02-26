@@ -1,6 +1,9 @@
 package testDataFactory
 
 import com.github.statnett.loadflowservice.formItemHandlers.AutoSerializableSensitivityFactor
+import com.github.statnett.loadflowservice.formItemHandlers.FormItemNames.Companion.LOAD_FLOW_PARAMS
+import com.github.statnett.loadflowservice.formItemHandlers.FormItemNames.Companion.SENSITIVITY_ANALYSIS_PARAMS
+import com.github.statnett.loadflowservice.formItemHandlers.FormItemNames.Companion.SENSITIVITY_FACTORS
 import io.ktor.client.request.forms.formData
 import io.ktor.http.content.PartData
 import kotlinx.serialization.Serializable
@@ -85,7 +88,7 @@ fun allSensitivityAnalysisConfigs(): List<SensitivityAnalysisConfig> {
 fun loadParams(): List<PartData> {
     return formData {
         append(
-            "load-parameters",
+            LOAD_FLOW_PARAMS,
             ieee14SensitivityLoadParams(),
         )
     }
@@ -94,7 +97,7 @@ fun loadParams(): List<PartData> {
 fun sensFactors(): List<PartData> {
     return formData {
         append(
-            "sensitivity-factors",
+            SENSITIVITY_FACTORS,
             Json.encodeToString(ieee14SensitivityFactor()),
         )
     }
@@ -112,7 +115,7 @@ fun contingencies(): List<PartData> {
 fun sensParams(): List<PartData> {
     return formData {
         append(
-            "sensitivity-analysis-parameters",
+            SENSITIVITY_ANALYSIS_PARAMS,
             ieee14SensitivityParams(),
         )
     }

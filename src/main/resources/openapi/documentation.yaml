@@ -63,7 +63,7 @@ paths:
       requestBody:
         requestBody:
           $ref: '#/components/networkFile'
-          load-flow-params: Solver parameters. See /default-values/load-params
+          load-flow-params: Solver parameters. See /default-values/load-flow-params
 
 
       responses:
