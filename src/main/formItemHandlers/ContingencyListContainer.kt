@@ -1,5 +1,6 @@
 package com.github.statnett.loadflowservice.formItemHandlers
 
+import com.github.statnett.loadflowservice.formItemHandlers.FormItemNames.Companion.CONTINGENCIES
 import com.powsybl.contingency.ContingenciesProvider
 import com.powsybl.contingency.Contingency
 import com.powsybl.contingency.contingency.list.ContingencyList
@@ -25,7 +26,7 @@ class ContingencyListContainer : AutoVersionableJsonParser(), FormItemLoadable, 
 
     override fun formItemHandler(part: PartData.FormItem) {
         val name = part.name ?: ""
-        if (name == "contingencies") {
+        if (name == CONTINGENCIES) {
             this.update(part.value)
             logger.info { "Received contingencies: ${part.value}" }
         }
