@@ -1,5 +1,6 @@
 package com.github.statnett.loadflowservice.formItemHandlers
 
+import com.github.statnett.loadflowservice.formItemHandlers.FormItemNames.Companion.SECURITY_ANALYSIS_PARAMS
 import com.powsybl.security.SecurityAnalysisParameters
 import com.powsybl.security.json.JsonSecurityAnalysisParameters
 import io.github.oshai.kotlinlogging.KotlinLogging
@@ -21,7 +22,7 @@ class SecurityAnalysisParametersContainer : AutoVersionableJsonParser(), FormIte
 
     override fun formItemHandler(part: PartData.FormItem) {
         val name = part.name ?: ""
-        if (name == "security-analysis-parameters") {
+        if (name == SECURITY_ANALYSIS_PARAMS) {
             this.update(part.value)
             logger.info { "Received security analysis parameters: ${part.value}" }
         }

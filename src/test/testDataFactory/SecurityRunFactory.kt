@@ -1,5 +1,6 @@
 package testDataFactory
 
+import com.github.statnett.loadflowservice.formItemHandlers.FormItemNames.Companion.SECURITY_ANALYSIS_PARAMS
 import io.ktor.client.request.forms.formData
 import io.ktor.http.content.PartData
 
@@ -10,7 +11,7 @@ fun ieee14SecurityParams(): String {
 fun securityParams(): List<PartData> {
     return formData {
         append(
-            "security-analysis-parameters",
+            SECURITY_ANALYSIS_PARAMS,
             ieee14SecurityParams(),
         )
     }

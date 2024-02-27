@@ -2,6 +2,7 @@ package com.github.statnett.loadflowservice
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.github.statnett.loadflowservice.formItemHandlers.FormItemNames.Companion.LOAD_FLOW_PARAMS
+import com.github.statnett.loadflowservice.formItemHandlers.FormItemNames.Companion.SECURITY_ANALYSIS_PARAMS
 import com.github.statnett.loadflowservice.formItemHandlers.FormItemNames.Companion.SENSITIVITY_ANALYSIS_PARAMS
 import com.powsybl.iidm.network.Network
 import com.powsybl.nad.NetworkAreaDiagram
@@ -142,7 +143,6 @@ fun defaultSecurityAnalysisParameters(): String {
 class UnknownRouteException(message: String) : Exception(message)
 
 fun defaultParameterSet(name: String): String {
-    val securityAnalysisParams = "security-analysis-params"
     return when (name) {
         LOAD_FLOW_PARAMS -> {
             defaultLoadFlowParameters()
@@ -152,12 +152,12 @@ fun defaultParameterSet(name: String): String {
             defaultSensitivityAnalysisParameters()
         }
 
-        securityAnalysisParams -> {
+        SECURITY_ANALYSIS_PARAMS -> {
             defaultSecurityAnalysisParameters()
         }
 
         else -> {
-            val allowed = listOf(LOAD_FLOW_PARAMS, SENSITIVITY_ANALYSIS_PARAMS, securityAnalysisParams)
+            val allowed = listOf(LOAD_FLOW_PARAMS, SENSITIVITY_ANALYSIS_PARAMS, SECURITY_ANALYSIS_PARAMS)
             throw UnknownRouteException("Unknown parameters set $name. Must be one of $allowed")
         }
     }
