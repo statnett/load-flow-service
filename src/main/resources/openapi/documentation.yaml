@@ -62,7 +62,6 @@ paths:
       description: Run load flow calculation
       requestBody:
         $ref: '#/components/networkFile'
-        load-flow-params: Solver parameters. See /default-values/load-flow-params
 
 
       responses:
@@ -118,6 +117,23 @@ paths:
         500:
           $ref: '#/components/internalError'
 
+  /sensitivity-analysis:
+    post:
+      description: Run a sensitivity analysis. See https://www.powsybl.org/pages/documentation/simulation/sensitivity/
+      requestBody:
+        $ref: '#/components/networkFile'
+
+      responses:
+        200:
+          description: Result of the sensitivity analysis
+          content:
+            application/json:
+              type: object
+        422:
+          $ref: '#/components/missingNetworkFileResponse'
+        500:
+          $ref: '#/components/internalError'
+
 
 components:
   schemas:
@@ -134,9 +150,23 @@ components:
           type: double
         reactivePower:
           type: double
+    sensitivity-factor:
+      type: object
+      properties:
+        functionType:
+          type: string
+        functionId:
+          type: string
+        variableType:
+          type: string
+        variableId:
+          type: string
+        variableSet:
+          type: bool
+        contingencyContextType:
+          type: string
   networkFile:
     description: Form with network data sent as file
-    required: true
     content:
       multipart/form-data:
         schema:
@@ -145,6 +175,24 @@ components:
             network:
               type: string
               format: binary
+            load-flow-params:
+              type: object
+              description: Parameters for load flow calculations. Has effect for /run-load-flow and /sensitivity-analysis). See default-values/load-flow-params for possible fields
+            sensitivity-analysis-params:
+              type: object
+              description: Parameters for sensitivity analysis. Has effect for /sensitivity-analysis. See /default-values/sensitivity-analysis-parameters for possible fields
+            sensitivity-factors:
+              type: array
+              description: Sensitivity factors. Has effect for /sensitivity-analysis
+              items:
+                $ref: '#/components/schemas/sensitivity-factor'
+            contingencies:
+              type: array
+              description: Contingencies. Has effect for /sensitivity-analysis
+              items:
+                type: object
+          required:
+          - network
   missingNetworkFileResponse:
     description: No network file provided
     content:
@@ -162,4 +210,3 @@ components:
     content:
       image/svg+xml:
         type: string
-

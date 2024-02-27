@@ -1,6 +1,7 @@
 package testDataFactory
 
 import com.github.statnett.loadflowservice.formItemHandlers.AutoSerializableSensitivityFactor
+import com.github.statnett.loadflowservice.formItemHandlers.FormItemNames.Companion.CONTINGENCIES
 import com.github.statnett.loadflowservice.formItemHandlers.FormItemNames.Companion.LOAD_FLOW_PARAMS
 import com.github.statnett.loadflowservice.formItemHandlers.FormItemNames.Companion.SENSITIVITY_ANALYSIS_PARAMS
 import com.github.statnett.loadflowservice.formItemHandlers.FormItemNames.Companion.SENSITIVITY_FACTORS
@@ -106,7 +107,7 @@ fun sensFactors(): List<PartData> {
 fun contingencies(): List<PartData> {
     return formData {
         append(
-            "contingencies",
+            CONTINGENCIES,
             Json.encodeToString(ieee14BusContingencies()),
         )
     }

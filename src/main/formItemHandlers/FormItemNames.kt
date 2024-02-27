@@ -6,5 +6,6 @@ class FormItemNames {
         const val SENSITIVITY_ANALYSIS_PARAMS = "sensitivity-analysis-params"
         const val SENSITIVITY_FACTORS = "sensitivity-factors"
         const val SECURITY_ANALYSIS_PARAMS = "security-analysis-params"
+        const val CONTINGENCIES = "contingencies"
     }
 }
