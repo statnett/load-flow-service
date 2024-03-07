@@ -155,7 +155,26 @@ paths:
             text/plain:
               type: string
 
+  /result/{id}:
+    get:
+      description: Result for the run
+      parameters:
+      - in: path
+        name: id
+        required: true
+        description: ID provided for the run (obtained from the response of the request starting the run)
 
+      responses:
+        200:
+          description: Result from the run
+          content:
+            application/json:
+              type: object
+        404:
+          description: Task not found
+          content:
+            text/plain:
+              type: string
 
 components:
   schemas:
