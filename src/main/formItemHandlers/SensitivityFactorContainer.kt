@@ -1,5 +1,6 @@
 package com.github.statnett.loadflowservice.formItemHandlers
 
+import com.github.statnett.loadflowservice.formItemHandlers.FormItemNames.Companion.SENSITIVITY_FACTORS
 import com.powsybl.contingency.ContingencyContext
 import com.powsybl.contingency.ContingencyContextType
 import com.powsybl.sensitivity.SensitivityFactor
@@ -49,7 +50,7 @@ class SensitivityFactorContainer : FormItemLoadable {
 
     override fun formItemHandler(part: PartData.FormItem) {
         val name = part.name ?: ""
-        if (name == "sensitivity-factors") {
+        if (name == SENSITIVITY_FACTORS) {
             this.update(part.value)
             logger.info { "Received sensitivity factors parameters: ${part.value}" }
         }
