@@ -1,5 +1,6 @@
 package com.github.statnett.loadflowservice
 
+import com.fasterxml.jackson.databind.ObjectMapper
 import com.powsybl.commons.PowsyblException
 import com.powsybl.commons.reporter.Reporter
 import com.powsybl.commons.reporter.ReporterModel
@@ -13,7 +14,7 @@ import com.powsybl.iidm.network.Network
 import com.powsybl.iidm.network.NetworkFactory
 import com.powsybl.loadflow.LoadFlow
 import com.powsybl.loadflow.LoadFlowParameters
-import com.powsybl.loadflow.json.JsonLoadFlowParameters
+import com.powsybl.loadflow.json.LoadFlowParametersJsonModule
 import com.powsybl.security.LimitViolationFilter
 import com.powsybl.security.SecurityAnalysis
 import com.powsybl.security.SecurityAnalysisParameters
@@ -27,7 +28,6 @@ import com.powsybl.sensitivity.SensitivityAnalysisParameters
 import com.powsybl.sensitivity.SensitivityFactor
 import com.powsybl.sensitivity.SensitivityVariableSet
 import io.github.oshai.kotlinlogging.KotlinLogging
-import java.io.ByteArrayOutputStream
 import java.io.StringWriter
 
 private val logger = KotlinLogging.logger {}
@@ -74,11 +74,9 @@ fun networkFromFileContent(content: FileContent): Network {
 
 fun defaultLoadFlowParameters(): String {
     val parameters = LoadFlowParameters()
-    val stream = ByteArrayOutputStream()
-    JsonLoadFlowParameters.write(parameters, stream)
-
-    // TODO: here we undo pretty printing. See if a raw JSON string can be obtained in a more elegant way
-    return undoPrettyPrintJson(stream.toString())
+    val mapper = ObjectMapper()
+    mapper.registerModule(LoadFlowParametersJsonModule())
+    return mapper.writeValueAsString(parameters)
 }
 
 fun loadFlowTaskName(): String {

@@ -57,10 +57,6 @@ suspend fun multiPartDataHandler(
     return files
 }
 
-fun undoPrettyPrintJson(jsonString: String): String {
-    return jsonString.replace("\n", "").replace(" ", "")
-}
-
 enum class DiagramType { Generic, Substation, VoltageLevel }
 
 // Case insensitive enum value matching
