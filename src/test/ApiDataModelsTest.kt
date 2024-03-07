@@ -7,7 +7,7 @@ import kotlinx.serialization.json.Json
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
-class ApiDataModelTest {
+class ApiDataModelsTest {
     @Test
     fun `Should be 14 buses in test network`() {
         val network = IeeeCdfNetworkFactory.create14()
