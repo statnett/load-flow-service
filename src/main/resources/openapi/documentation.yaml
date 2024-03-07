@@ -134,6 +134,28 @@ paths:
         500:
           $ref: '#/components/internalError'
 
+  /status/{id}:
+    get:
+      description: Run status for a run
+      parameters:
+      - in: path
+        name: id
+        required: true
+        description: ID provided for the run (obtained from the response of the request starting the run)
+
+      responses:
+        200:
+          description: Status info for the run
+          content:
+            application/json:
+              type: object
+        404:
+          description: Task not found
+          content:
+            text/plain:
+              type: string
+
+
 
 components:
   schemas:
