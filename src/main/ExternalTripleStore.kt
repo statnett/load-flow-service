@@ -10,8 +10,11 @@ data class ParsedSparqlQuery(
 fun parseQuery(sparqlQueryResource: String): ParsedSparqlQuery {
     val catalog = QueryCatalog(sparqlQueryResource)
 
+    val namespaces: MutableMap<String, String> = mutableMapOf()
+    namespaces.putAll(Config.namespaces)
+    namespaces.putAll(extractPrefixes(catalog))
     return ParsedSparqlQuery(
-        extractPrefixes(catalog),
+        namespaces,
         extractPredicates(catalog),
     )
 }
