@@ -28,3 +28,10 @@ fun extractPrefixes(catalog: QueryCatalog): Map<String, String> {
     val matches = catalog.values.map { query -> regex.findAll(query) }.asSequence().flatten()
     return matches.map { match -> Pair(match.groupValues[0], match.groupValues[1]) }.toMap()
 }
+
+fun createExtractionQuery(query: ParsedSparqlQuery): String {
+    val prefix = query.prefixes.map { entry -> "PREFIX ${entry.key}: ${entry.value}" }.joinToString(separator = "\n")
+    val predicates = query.predicates.joinToString(separator = " ")
+    val select = "SELECT ?graph ?s ?p ?o {\nVALUES ?p { $predicates }\nGRAPH ?graph {?s ?p ?o}}"
+    return "$prefix\n$select"
+}
