@@ -1,6 +1,8 @@
 package com.github.statnett.loadflowservice
 
 import com.powsybl.triplestore.api.QueryCatalog
+import com.powsybl.triplestore.api.TripleStore
+import com.powsybl.triplestore.api.TripleStoreFactory
 
 data class ParsedSparqlQuery(
     val prefixes: Map<String, String>,
@@ -32,9 +34,29 @@ fun extractPrefixes(catalog: QueryCatalog): Map<String, String> {
     return matches.map { match -> Pair(match.groupValues[0], match.groupValues[1]) }.toMap()
 }
 
+private fun prefixString(prefixes: Map<String, String>): String {
+    return prefixes.map { entry -> "PREFIX ${entry.key}: ${entry.value}" }.joinToString(separator = "\n")
+}
+
 fun createExtractionQuery(query: ParsedSparqlQuery): String {
-    val prefix = query.prefixes.map { entry -> "PREFIX ${entry.key}: ${entry.value}" }.joinToString(separator = "\n")
+    val prefix = prefixString(query.prefixes)
     val predicates = query.predicates.joinToString(separator = " ")
     val select = "SELECT ?graph ?s ?p ?o {\nVALUES ?p { $predicates }\nGRAPH ?graph {?s ?p ?o}}"
     return "$prefix\n$select"
+}
+
+fun populateTripleStore(
+    quads: List<Quad>,
+    prefixes: Map<String, String>,
+): TripleStore {
+    val store = TripleStoreFactory.create()
+
+    val quadString =
+        quads.joinToString(
+            separator = "\n",
+        ) { quad -> "GRAPH ${quad.graph} {${quad.subject} ${quad.predicate} ${quad.obj}}" }
+    val prefixString = prefixString(prefixes)
+    val query = "${prefixString}\nINSERT DATA {$quadString}"
+    store.update(query)
+    return store
 }

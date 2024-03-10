@@ -1,6 +1,8 @@
 import com.github.statnett.loadflowservice.ParsedSparqlQuery
+import com.github.statnett.loadflowservice.Quad
 import com.github.statnett.loadflowservice.createExtractionQuery
 import com.github.statnett.loadflowservice.parseQuery
+import com.github.statnett.loadflowservice.populateTripleStore
 import org.junit.jupiter.api.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
@@ -27,5 +29,21 @@ class TestExternalTripleStore {
                 "VALUES ?p { cim:a md:b }\nGRAPH ?graph {?s ?p ?o}}"
         )
         assertEquals(createExtractionQuery(parsedQuery), expectedQuery)
+    }
+
+    @Test
+    fun `test populate triplestore`() {
+        val quads =
+            listOf(
+                Quad("<http://g>", "<urn:uuid:a1>", "ns:a", "ns:b"),
+                Quad("<http://g>", "<urn:uuid:a2>", "ns:a.x", "2.0"),
+            )
+
+        val prefixes = mapOf("ns" to "<http://ns.com>")
+        val store = populateTripleStore(quads, prefixes)
+        assertEquals(setOf("http://g"), store.contextNames())
+
+        val result = store.query("select (count(*) as ?count) where {?s ?p ?o}")
+        assertEquals(2, result[0]["count"]!!.toInt())
     }
 }
