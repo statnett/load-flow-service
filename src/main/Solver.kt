@@ -66,6 +66,7 @@ fun networkFromFileContent(content: FileContent): Network {
     val dataSource = content.asReadOnlyMemDataSource()
     val importer = Importer.find(dataSource, loader, computationManager, importConfig)
     if (importer != null) {
+        logger.info { "Loading file using importer ${importer.javaClass}" }
         val networkFactory = NetworkFactory.findDefault()
         return importer.importData(dataSource, networkFactory, null, reporter)
     }
