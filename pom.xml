@@ -41,6 +41,7 @@
             <groupId>io.ktor</groupId>
             <artifactId>ktor-server-test-host-jvm</artifactId>
             <version>${ktor.version}</version>
+            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>io.ktor</groupId>
@@ -71,6 +72,7 @@
             <groupId>org.jetbrains.kotlin</groupId>
             <artifactId>kotlin-test-junit5</artifactId>
             <version>2.0.0-Beta5</version>
+            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>io.github.oshai</groupId>
