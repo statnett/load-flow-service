@@ -109,7 +109,7 @@ fun solve(
             reporter,
         )
     return LoadFlowResultForApi(
-        isOk = result.isOk,
+        isOk = !result.isFailed,
         buses = busPropertiesFromNetwork(network),
         branches = branchPropertiesFromNetwork(network),
         report = reporterToString(reporter),
