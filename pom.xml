@@ -91,6 +91,47 @@
             <artifactId>slf4j-api</artifactId>
             <version>2.0.12</version>
         </dependency>
+        <dependency>
+            <groupId>io.ktor</groupId>
+            <artifactId>ktor-serialization-jvm</artifactId>
+            <version>${ktor.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.ktor</groupId>
+            <artifactId>ktor-client-core-jvm</artifactId>
+            <version>${ktor.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>io.ktor</groupId>
+            <artifactId>ktor-http-jvm</artifactId>
+            <version>${ktor.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.ktor</groupId>
+            <artifactId>ktor-utils-jvm</artifactId>
+            <version>${ktor.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.jetbrains.kotlinx</groupId>
+            <artifactId>kotlinx-serialization-core-jvm</artifactId>
+            <version>1.6.1</version>
+        </dependency>
+        <dependency>
+            <groupId>io.ktor</groupId>
+            <artifactId>ktor-io-jvm</artifactId>
+            <version>${ktor.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+            <version>2.15.4</version>
+        </dependency>
+        <dependency>
+            <groupId>org.jetbrains.kotlinx</groupId>
+            <artifactId>kotlinx-serialization-json-jvm</artifactId>
+            <version>1.6.1</version>
+        </dependency>
     </dependencies>
 
     <build>
