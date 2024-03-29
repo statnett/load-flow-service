@@ -10,12 +10,14 @@ private val logger = KotlinLogging.logger {}
 class Environment {
     companion object {
         var namespaceFile: String? = System.getenv("NAMESPACE_FILE")
+        val cimResource: String? = System.getenv("CIM_RESOURCE")
     }
 }
 
 class Config {
     companion object {
         var namespaces: Map<String, String> = loadNamespaces(Environment.namespaceFile)
+        val cimResource: String = Environment.cimResource ?: "CIM16.sparql"
     }
 }
 

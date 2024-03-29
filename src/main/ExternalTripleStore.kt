@@ -46,6 +46,13 @@ fun populateInMemTripleStore(sparqlResult: SparqlResultJson): TripleStoreRDF4J {
     return store
 }
 
+fun updateInMemTripleStore(
+    store: TripleStoreRDF4J,
+    sparqlResult: SparqlResultJson,
+) {
+    store.update(insertQuery(sparqlResult.result.bindings))
+}
+
 fun insertTriple(result: Map<String, SparqlItem>): String? {
     val graph = result["graph"]
     val subject = result["s"]

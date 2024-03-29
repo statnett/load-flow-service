@@ -84,3 +84,56 @@ val sparqlObjectArb =
         val chosen = Arb.choice(options).bind()
         SparqlItem(chosen.first, chosen.second)
     }
+
+class SmallCimModels(private val cim: String) {
+    companion object {
+        const val CON_NODE1_URI = "urn:uuid:12-af"
+        const val CON_NODE2_URI = "urn:uuid:13-af"
+    }
+
+    fun twoTerminalsWithConnectivityNode(): SparqlResultJson {
+        return SparqlResultJson(
+            head = SparqlVars(listOf("graph", "s", "p", "o")),
+            result =
+                SparqlResult(
+                    listOf(
+                        mapOf(
+                            "graph" to SparqlItem(SparqlTypes.URI, "http://g"),
+                            "s" to SparqlItem(SparqlTypes.URI, "urn:uuid:12-ae"),
+                            "p" to SparqlItem(SparqlTypes.URI, "$cim#Terminal.ConnectivityNode"),
+                            "o" to SparqlItem(SparqlTypes.URI, CON_NODE1_URI),
+                        ),
+                        mapOf(
+                            "graph" to SparqlItem(SparqlTypes.URI, "http://g"),
+                            "s" to SparqlItem(SparqlTypes.URI, "urn:uuid:13-ae"),
+                            "p" to SparqlItem(SparqlTypes.URI, "$cim#Terminal.ConnectivityNode"),
+                            "o" to SparqlItem(SparqlTypes.URI, CON_NODE2_URI),
+                        ),
+                    ),
+                ),
+        )
+    }
+
+    fun twoConnectivityNodes(): SparqlResultJson {
+        return SparqlResultJson(
+            head = SparqlVars(listOf("graph", "s", "p", "o")),
+            result =
+                SparqlResult(
+                    listOf(
+                        mapOf(
+                            "graph" to SparqlItem(SparqlTypes.URI, "http://g"),
+                            "s" to SparqlItem(SparqlTypes.URI, CON_NODE1_URI),
+                            "p" to SparqlItem(SparqlTypes.URI, "$cim#IdentifiedObject.name"),
+                            "o" to SparqlItem(SparqlTypes.LITERAL, "Connectivity node 1"),
+                        ),
+                        mapOf(
+                            "graph" to SparqlItem(SparqlTypes.URI, "http://g"),
+                            "s" to SparqlItem(SparqlTypes.URI, CON_NODE2_URI),
+                            "p" to SparqlItem(SparqlTypes.URI, "$cim#IdentifiedObject.name"),
+                            "o" to SparqlItem(SparqlTypes.LITERAL, "Connectivity node 2"),
+                        ),
+                    ),
+                ),
+        )
+    }
+}
