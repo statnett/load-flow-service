@@ -56,14 +56,14 @@ fun networkFromFirstFile(files: List<FileContent>): Network {
 // This function follows closely the functionality implemented in Powsybl-core Network.read
 // However, here we create the ReadOnlyMemDataSource our self which supports constructing it
 // from a zip archive (e.g. CIM/XML files zipped).
-fun networkFromFileContent(content: FileContent): Network {
+fun networkFromFileContent(content: NamedNetworkSource): Network {
     logger.info { "Loading network from file ${content.name}" }
 
     val importConfig = ImportConfig.CACHE.get()
     val loader = ImportersServiceLoader()
     val reporter = Reporter.NO_OP
     val computationManager = LocalComputationManager.getDefault()
-    val dataSource = content.asReadOnlyMemDataSource()
+    val dataSource = content.asReadOnlyDataSource()
     val importer = Importer.find(dataSource, loader, computationManager, importConfig)
     if (importer != null) {
         logger.info { "Loading file using importer ${importer.javaClass}" }

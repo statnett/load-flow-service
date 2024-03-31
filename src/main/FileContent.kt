@@ -1,12 +1,13 @@
 package com.github.statnett.loadflowservice
 
 import com.powsybl.commons.datasource.DataSourceUtil
+import com.powsybl.commons.datasource.ReadOnlyDataSource
 import com.powsybl.commons.datasource.ReadOnlyMemDataSource
 import java.io.ByteArrayInputStream
 import java.security.MessageDigest
 import java.util.zip.ZipInputStream
 
-class FileContent(val name: String, val bytes: ByteArray) {
+class FileContent(override val name: String, val bytes: ByteArray) : NamedNetworkSource {
     fun contentHash(): String {
         val md = MessageDigest.getInstance("MD5")
         return md.digest(this.bytes).joinToString(separator = "") { eachByte -> "%02x".format(eachByte) }
@@ -21,6 +22,10 @@ class FileContent(val name: String, val bytes: ByteArray) {
             return zippedArchiveReadOnlyMemDataSource()
         }
         return singleFileReadOnlyMemDataSource()
+    }
+
+    override fun asReadOnlyDataSource(): ReadOnlyDataSource {
+        return asReadOnlyMemDataSource()
     }
 
     private fun singleFileReadOnlyMemDataSource(): ReadOnlyMemDataSource {
