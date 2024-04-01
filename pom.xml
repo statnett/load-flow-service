@@ -8,6 +8,8 @@
         <ktor.version>3.0.0-beta-1</ktor.version>
         <main.class>com.github.statnett.loadflowservice.AppKt</main.class>
         <kotlin.code.style>official</kotlin.code.style>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     </properties>
 
     <dependencies>
