@@ -85,5 +85,6 @@ class ExternalNetworkResourceHandler(
         return Json.decodeFromString<SparqlResultJson>(response.body())
     }
 
+    // Used for testing
     fun tripleStoreQuery(query: String): PropertyBags = tripleStore.query(query)
 }

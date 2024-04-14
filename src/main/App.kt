@@ -6,7 +6,7 @@ import com.github.statnett.loadflowservice.formItemHandlers.MultiFormItemLoaders
 import com.github.statnett.loadflowservice.formItemHandlers.SecurityAnalysisParametersContainer
 import com.github.statnett.loadflowservice.formItemHandlers.SensitivityAnalysisParametersContainer
 import com.github.statnett.loadflowservice.formItemHandlers.SensitivityFactorContainer
-import com.powsybl.security.action.Action
+import com.powsybl.action.Action
 import com.powsybl.security.interceptors.SecurityAnalysisInterceptor
 import com.powsybl.security.monitor.StateMonitor
 import com.powsybl.security.strategy.OperatorStrategy

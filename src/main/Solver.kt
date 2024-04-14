@@ -1,9 +1,9 @@
 package com.github.statnett.loadflowservice
 
 import com.fasterxml.jackson.databind.ObjectMapper
+import com.powsybl.action.Action
 import com.powsybl.commons.PowsyblException
-import com.powsybl.commons.reporter.Reporter
-import com.powsybl.commons.reporter.ReporterModel
+import com.powsybl.commons.report.ReportNode
 import com.powsybl.computation.local.LocalComputationManager
 import com.powsybl.contingency.ContingenciesProvider
 import com.powsybl.contingency.contingency.list.ContingencyList
@@ -18,7 +18,6 @@ import com.powsybl.loadflow.json.LoadFlowParametersJsonModule
 import com.powsybl.security.LimitViolationFilter
 import com.powsybl.security.SecurityAnalysis
 import com.powsybl.security.SecurityAnalysisParameters
-import com.powsybl.security.action.Action
 import com.powsybl.security.detectors.DefaultLimitViolationDetector
 import com.powsybl.security.interceptors.SecurityAnalysisInterceptor
 import com.powsybl.security.monitor.StateMonitor
@@ -61,7 +60,7 @@ fun networkFromFileContent(content: NamedNetworkSource): Network {
 
     val importConfig = ImportConfig.CACHE.get()
     val loader = ImportersServiceLoader()
-    val reporter = Reporter.NO_OP
+    val reporter = ReportNode.NO_OP
     val computationManager = LocalComputationManager.getDefault()
     val dataSource = content.asReadOnlyDataSource()
     val importer = Importer.find(dataSource, loader, computationManager, importConfig)
@@ -84,14 +83,16 @@ fun loadFlowTaskName(): String {
     return "load-flow"
 }
 
-fun loadFlowReporter(): ReporterModel {
+fun loadFlowReporter(): ReportNode {
     val name = loadFlowTaskName()
-    return ReporterModel(name, name)
+    return ReportNode.newRootReportNode().withMessageTemplate(name, name).build()
 }
 
-fun reporterToString(reporter: ReporterModel): String {
+fun reporterToString(reporter: ReportNode): String {
     val writer = StringWriter()
-    reporter.export(writer)
+
+    // Check if we should use reporter writeJson instead
+    reporter.print(writer)
     return writer.toString()
 }
 
@@ -122,7 +123,7 @@ fun runSensitivityAnalysis(
     params: SensitivityAnalysisParameters,
     contingenciesList: ContingencyList,
 ): LoadFlowServiceSensitivityAnalysisResult {
-    val reporter = ReporterModel("sensitivity", "")
+    val reporter = ReportNode.newRootReportNode().withMessageTemplate("sensitivity", "").build()
     val variableSets: List<SensitivityVariableSet> = listOf()
     val contingencies = contingenciesList.getContingencies(network)
 
@@ -152,7 +153,7 @@ fun runSecurityAnalysis(
     actions: List<Action>,
     monitors: List<StateMonitor>,
 ): LoadFlowServiceSecurityAnalysisResult {
-    val reporter = ReporterModel("security", "")
+    val reporter = ReportNode.newRootReportNode().withMessageTemplate("security", "").build()
     val securityReport =
         SecurityAnalysis.run(
             network,
