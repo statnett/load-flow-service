@@ -4,7 +4,7 @@
     <artifactId>load-flow-service</artifactId>
     <version>0.0.0</version>
     <properties>
-        <kotlin.version>1.9.25</kotlin.version>
+        <kotlin.version>2.0.20</kotlin.version>
         <ktor.version>3.0.0-beta-1</ktor.version>
         <main.class>com.github.statnett.loadflowservice.AppKt</main.class>
         <kotlin.code.style>official</kotlin.code.style>
