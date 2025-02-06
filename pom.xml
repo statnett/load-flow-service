@@ -79,7 +79,7 @@
         <dependency>
             <groupId>io.github.oshai</groupId>
             <artifactId>kotlin-logging-jvm</artifactId>
-            <version>7.0.3</version>
+            <version>7.0.4</version>
         </dependency>
         <!-- slf4j dependency must be added after upgrade to 2023.3.0 of powsybl -->
         <!-- Check if these can be removed when ktor upgrades. Looks like ktor* use 1.7.36 -->
