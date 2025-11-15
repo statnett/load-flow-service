@@ -1,4 +1,4 @@
-FROM eclipse-temurin:21
+FROM eclipse-temurin:25
 RUN mkdir /opt/app
 COPY target/dependency-jars /opt/app/dependency-jars
 COPY target/load-flow-service.jar /opt/app
